@@ -6,7 +6,7 @@ import java.util.LinkedList;
 /*
  * Samo ima dodanu listu (ostalo je sve e_nka) u koju spremamo stringove koji predstavljaju akcije
  */
-public class Akcijski_E_NKA extends E_NKA{
+public class Action_E_NKA extends E_NKA{
 	private String name;
 	private LinkedList<String> action;
 
