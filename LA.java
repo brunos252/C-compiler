@@ -19,15 +19,23 @@ public class LA {
 
     public static void main(String[] args) throws IOException {
         //Stvaranje ref na datoteku i bf readera
-        File tablica = new File("");
+        File tablica = new File("");  //ovdje bi trebalo pisati nesto u stilu \\analizator\\pomocni.txt , ovisno kak ju nazove sacaric
         br = new BufferedReader(new FileReader(tablica));
-
+        //tu ispod bi islo prvo citanje onih 5 ili kolko redaka i spremanje u odgovarajuče liste, polja itd (to če koristit evacic)
+        //a nakon toga citanje cijele datoteke do kraja i to poslat u ovu funkciju kaj si napisal(ako ce funckija sve e-nka inicijalizirat) ili čitanje blokova
+        //ako ce funkcija inicijalizirat jedan po jedan
 
 
         br.close();
+
+        //tu nakon inicijalizacije ide evacicev dio, i citas sa stdina (koji je naravno upaljen od pocekta rada ovog programa pa je vazno da u inicijalizaciji
+        //se nista ne cita sa stdina)
     }
 
-    private void initializeActEnkas() throws IOException {
+    private void initializeActEnkas() throws IOException { //mislim da ovdje trebas primat u funkciju barem jedan veliki String koji ce u sebi sadrzavat sve za inicijalizaciju jednog enka
+                                                            //mozda ne bi bilo lose da ti je ovo funkicja za inicjalizaciju jednog akcijskog enka, koju pozivas za svakog
+                                                            //jer ako nije onda mislim da je problem  u "else if" dijelu zato kaj za svaki novi akcijski enka moras re-inicijalizirat
+                                                            //sve ove mape,list,i hashove (ili popravi to ili radi funkciju da je za inicijalizaciju jednog akcijskog enka)
         //Polja potrebna za inicijalizaciju svakog ActionENKA
         LinkedList<String> action, entry = new LinkedList<>();
         HashSet<String> allStates, alphabet, acceptableStates = new HashSet<>();
