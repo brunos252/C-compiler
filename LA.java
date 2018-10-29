@@ -18,6 +18,7 @@ public class LA {
     private static LinkedList<Action_E_NKA> action_e_nkas;
     private static LinkedList<String> allPosibleStates;
     private static LinkedList<String> allPosibleActions;
+    private static String LAState = "";
 
     public static void main(String[] args) throws IOException {
         //Stvaranje ref na datoteku i bf readera
