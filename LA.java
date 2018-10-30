@@ -6,11 +6,16 @@
  * Nakon svakog prijelaza izvrsavamo akciju definiranu u "Pravilima leksickog analizatora".
  * "Niz uniformnih znakova" ja rezultat rada ovog LA, odnosno to je ono sto se ispisuje na stdin.
  */
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+
+import simEnka.Action_E_NKA;
 
 public class LA {
 
@@ -18,15 +23,21 @@ public class LA {
     private static LinkedList<Action_E_NKA> action_e_nkas;
     private static LinkedList<String> allPosibleStates;
     private static LinkedList<String> allPosibleActions;
-    private static String LAState = "";
+    private static String LAState;
+    private static int row=1;
+    private static int last=0; //index posljednjeg charactera u ulaznom textu
+    private static int next=0; //index charactera kojeg sljedeceg citamo
+    private static String text; //kompletan ulazni text (program)
+    private static int first=0; //index prvog neanaliziranog charactera 
+    private static int prefixLast=-1; //index zadnjeg charactera iz prepoznatog prefixa
+    private static int first_h=0; //pomocna varijabla
+    private static LinkedList<String> actions=new LinkedList<>();
+    private static Action_E_NKA actEnka = action_e_nkas.get(0); //samo inicijalno, predstavlja zadnji enka koji je prihvatio niz
 
     public static void main(String[] args) throws IOException {
         //Stvaranje ref na datoteku i bf readera
         File tablica = new File(""); //ovdje bi trebalo pisati nesto u stilu \\analizator\\pomocni.txt , ovisno kak ju nazove sacaric
         br = new BufferedReader(new FileReader(tablica));
-        //tu ispod bi islo prvo citanje onih 5 ili kolko redaka i spremanje u odgovarajuče liste, polja itd (to če koristit evacic)
-        //a nakon toga citanje cijele datoteke do kraja i to poslat u ovu funkciju kaj si napisal(ako ce funckija sve e-nka inicijalizirat) ili čitanje blokova
-        //ako ce funkcija inicijalizirat jedan po jedan
 
         intializeAllPosibleStates();
         initalizeAllPosibleActions();
@@ -34,12 +45,67 @@ public class LA {
 
         br.close();
 
-        //tu nakon inicijalizacije ide evacicev dio, i citas sa stdina (koji je naravno upaljen od pocekta rada ovog programa pa je vazno da u inicijalizaciji
-        //se nista ne cita sa stdina)
-
+        // Zadnji dio
+        br=new BufferedReader(new InputStreamReader(System.in));
+        String current=new String();
+        boolean result=false;
+        LinkedList<String> entry=new LinkedList<>();
+        String line=new String();
+        
+        
+        StringBuilder sb=new StringBuilder();
+        while(br.ready() && !(line=br.readLine()).isEmpty()) {  //citanje cijele datoteke
+        	sb.append(line);
+        }
+        
+        text=sb.toString();  //stvori veliki string od cijelog ulaza
+        last=text.length();
+        
+        //zavrsna petlja
+        while(first<last) { //dok se sa indexom prvog charactera nismo pozicionirali na kraj ulaznog texta
+        	entry.clear();
+        	result=false;
+        	
+        	++next;  //"procitaj" sljedeceg
+        	if(next<=last) { //ako je nismo dosli do kraja ulaza
+	        	current=text.substring(first, next);
+	        	entry.add(current);
+	        	
+	        	for(Action_E_NKA enka : action_e_nkas) {
+	        		if(enka.getName().equals(LAState)) {
+	        			enka.setEntry(entry);
+	        			result=enka.result();
+	        			actEnka=enka;
+	        			
+	        			if(result) {  //ispunjeno da se postuje prvo pravilo koje prihvaca niz
+	        				prefixLast=next;
+	        				break;
+	        			}
+	        		}
+	        	}
+	        	
+	        	if(!result && prefixLast!=(-1)) {
+	        		
+	        		doActions();
+	        		
+	        	}
+	        	
+	        }else if(prefixLast==(-1)){  //ako smo dosli do kraja ulaza
+	    		System.err.println("Leksicka pogreska u redu: " + row);
+	    		++first; //preskoci najlijeviji znak
+	    		next=first; //vrati se nazad
+	        }else {
+	        	
+	        	doActions();
+	        	
+	        }
+        }
+        
+        br.close();
     }
 
-    private static void initializeActEnkas() throws IOException {
+    @SuppressWarnings("null")
+	private static void initializeActEnkas() throws IOException {
         //mislim da ovdje trebas primat u funkciju barem jedan veliki String koji ce u sebi sadrzavat sve za inicijalizaciju jednog enka
         //mozda ne bi bilo lose da ti je ovo funkicja za inicjalizaciju jednog akcijskog enka, koju pozivas za svakog
         //jer ako nije onda mislim da je problem  u "else if" dijelu zato kaj za svaki novi akcijski enka moras re-inicijalizirat
@@ -117,6 +183,36 @@ public class LA {
                 }
             }
         }
+    }
+    
+    private static void doActions() {
+    	first_h=first;
+		next=prefixLast;  //vracanje na zadnji prepoznati prefix
+		String current=text.substring(first,prefixLast); //prepoznati prefix
+		
+		actions=actEnka.getAction();
+		for(String s: actions) {
+			String[] splitted=s.split(" ");
+			
+			switch (splitted[0]){
+			case "-": first=prefixLast;
+			prefixLast=-1;
+				break;
+			case "NOVI_REDAK": ++row;
+				break;
+			case "UDJI_U_STANJE": LAState=splitted[1];
+				break;
+			case "VRATI_SE": prefixLast=first_h + Integer.parseInt(splitted[1]); //prefix last je zadnji kojeg cemo prepoznat, a u slucaju VRATI_SE
+				next=prefixLast;  //vracanje na zadnji prepoznati prefix			// to mora biti samo vrati_se znakova
+				first=first_h;
+				break;																	
+			
+			default: System.out.println(splitted[0] + " " + row + " " + current);	//inace ispis sve sto treba na stdin
+				first=prefixLast;
+				prefixLast=-1;
+				break;
+			}
+		}
     }
 
 }
