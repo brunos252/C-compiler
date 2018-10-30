@@ -99,6 +99,7 @@ public class LA {
         while ((line = br.readLine()) != null){
             if (line.startsWith("%X")){
                 String[] states = line.split(" ");
+                LAState = states[1];
                 for(int i = 1; i < states.length; i++){
                     allPosibleStates.add(states[i]);
                 }
