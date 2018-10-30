@@ -163,7 +163,11 @@ public class GLA {
 		
 		
 		// Analiza regularnog izraza i stvaranje pravila za e-nka.
-		turn(bits[1],result); //poziv pocetka
+		int[] p=turn(bits[1],result); //poziv pocetka
+//		result.append(0+",$->"+p[0]);
+//		result.append("\n");
+//		result.append(1+",$->"+p[1]);
+//		result.append("\n");
 		
 		result.append(rest);
 		return result.toString();
@@ -177,7 +181,7 @@ public class GLA {
 		
 		// rjesavanje 'vanjskih' ili ('|') operatora
 		LinkedList<String> splited=operator_split(regular);
-		if(splited.size()>1) { //ako je nesto splitano
+		if(splited.size()>1) {
 			for(String s:splited) {
 				int[] sub=turn(new String(s),result);
 				
@@ -211,7 +215,7 @@ public class GLA {
 					break;
 					}
 					
-					result.append(previousStage + "," + sign + "->" + (stageName)); //prijelaz iz proslog u sadasnje stanje
+					result.append(previousStage + "," + sign + "->" + (stageName)); //prijelaz iz jednog stanja u drugo
 					result.append("\n");
 					previousStage=stageName;
 					++stageName;
@@ -262,7 +266,7 @@ public class GLA {
 							result.append(a+",$->"+temp[1]);
 							result.append("\n");
 						
-							++i;  //da se preskoci *
+							++i;
 					}
 				}
 				
