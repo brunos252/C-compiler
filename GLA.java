@@ -1,4 +1,12 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /*
  * Generira leksicki analizator pomocu podataka dobivenih na standardnom ulazu (zapravo samo nadopunjuje
@@ -14,14 +22,117 @@ public class GLA {
 	private static int stageName=0;
 	
 	public static void main(String[] args) {
-		String string=e_nka_rules("<S_pocetno>0(X|x)HH*","abc");
-		System.out.println(string);
+		//String string=e_nka_rules("<S_pocetno>0(X|x)HH*","abc");
+		//System.out.println(string);
+		
+		Map<String, String> regularDefinitions = new HashMap<String, String>();
+		List<String> rules = new LinkedList<String>();
+		String states = null, names = null, line, refRegDef;
+		String[] split;
+		boolean definitions = true;
+		int startIndex, endIndex;
+		
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))){
+			line = br.readLine();
+			while(line != null && !(line.isEmpty())) {
+				if(line.startsWith("%X")){
+						states = line + "\n";
+						definitions = false;
+				} else if(line.startsWith("%L")) {
+						names = line + "\n";
+				} else if(definitions) {
+					split = line.split(" ");
+					regularDefinitions.put(split[0], split[1]);
+				} else {
+					rules.add(line);
+				}
+			line = br.readLine();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		/*
+		 * algoritam 2.4.2
+		 * sve nezavrsne znakove sa desne strane regularnih definicija u ulaznoj
+		 * datoteci zamijenjuje zavrsnima
+		 */
+		String regEx;
+		for(String key : regularDefinitions.keySet()) {
+			regEx = regularDefinitions.get(key);
+			for(int i = 0; i < regEx.length(); i++) {
+				if(regEx.charAt(i) == '\\') {				//zaobilazi slucajeve kad je { medu zavrsnim znakovima, zapisan kao /{
+					i++;
+					continue;
+				}
+				else if(regEx.charAt(i) == '{') {
+					endIndex = regEx.indexOf('}', i);
+					refRegDef = regEx.substring(i, endIndex + 1);
+					regEx = regEx.replace(refRegDef, "(" + regularDefinitions.get(refRegDef) + ")");
+					regularDefinitions.put(key, regEx);
+				}
+			}
+		}
+		
+		/*
+		 * odvaja pravila na stringove prvi redak i ostatak, kakvi su potrebni za Segin algoritam ispod
+		 * takoder zamijenjuje nezavrsne znakove zavrsnima, npr {znamenka} postaje 0|1|2|3..
+		 * primjer first : <S_pocetno>\(
+		 * primjer rest  :	{
+		 *				  	-
+		 *					NOVI_REDAK
+		 *					}
+		 */
+		List<String> firsts = new LinkedList<String>();
+		List<String> rests = new LinkedList<String>();
+		String currentRest = "";
+		boolean first = true;
+		String substring;
+		for(String s : rules) {
+			if(s.startsWith("<")) {
+				while((startIndex = s.indexOf("{")) != -1 && s.charAt(startIndex - 1) != '\\') {					
+					endIndex = s.indexOf("}");
+					substring = s.substring(startIndex, endIndex + 1);
+					s = s.replace(substring, regularDefinitions.get(substring));
+				}
+				
+				if(!first) {
+					rests.add(currentRest + "\n");
+					currentRest = "";
+				} else
+					first = false;
+				firsts.add(s);
+			} else {
+				currentRest += currentRest.isEmpty() ? s : ("\n" + s);
+			}
+		}
+		rests.add(currentRest + "\n");
+		
+		/*
+		 * upis u izlaznu datoteku, prvo stanja i imena leksickih jedinki pa izlaze iz Seginog algoritma
+		 */
+		try {
+			File output = new File("/pomocni.txt");
+			//output.delete();
+			output.createNewFile();
+			FileOutputStream out = new FileOutputStream(output);
+			
+			out.write(states.getBytes());
+			out.write(names.getBytes());
+			
+			int size = firsts.size();
+			for(int i = 0; i < size; i++) {
+				out.write(e_nka_rules(firsts.get(i), rests.get(i)).getBytes());
+				//System.out.println(e_nka_rules(firsts.get(i), rests.get(i)) + "\n\n");
+			}
+			out.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
-	
-	
-	
-	/*
-	 * Prihvaca npr: <S_pocetno>\n
+/* 
+ * Prihvaca npr: <S_pocetno>\n
 					 {
 					 -
 					 NOVI_REDAK
