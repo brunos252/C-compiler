@@ -1,3 +1,5 @@
+package lab1;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -22,8 +24,8 @@ public class GLA {
 	private static int stageName=0;
 	
 	public static void main(String[] args) {
-		//String string=e_nka_rules("<S_pocetno>0(X|x)HH*","abc");
-		//System.out.println(string);
+//		String string=e_nka_rules("<S_unarni>(a)((b)|a)*","abc");
+//		System.out.println(string);
 		
 		Map<String, String> regularDefinitions = new HashMap<String, String>();
 		List<String> rules = new LinkedList<String>();
@@ -93,7 +95,7 @@ public class GLA {
 				while((startIndex = s.indexOf("{")) != -1 && s.charAt(startIndex - 1) != '\\') {					
 					endIndex = s.indexOf("}");
 					substring = s.substring(startIndex, endIndex + 1);
-					s = s.replace(substring, regularDefinitions.get(substring));
+					s = s.replace(substring,"("+ regularDefinitions.get(substring)+")");
 				}
 				
 				if(!first) {
@@ -122,8 +124,18 @@ public class GLA {
 			
 			int size = firsts.size();
 			for(int i = 0; i < size; i++) {
+				
+				System.gc();
+				try {
+					Thread.sleep(10);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				stageName=0;
 				out.write(e_nka_rules(firsts.get(i), rests.get(i)).getBytes());
-				//System.out.println(e_nka_rules(firsts.get(i), rests.get(i)) + "\n\n");
+//				System.out.print(e_nka_rules(firsts.get(i), rests.get(i)) + "\n\n");
 			}
 			out.close();
 		} catch (IOException e) {
@@ -166,7 +178,9 @@ public class GLA {
 		turn(bits[1],result);
 		
 		result.append(rest);
-		return result.toString();
+		
+		String back=result.toString();
+		return back;
 	}
 	
 	//vraca dva broja koja oznacavaju ime prvog i zavrsnog stanja tog izraza
@@ -179,7 +193,7 @@ public class GLA {
 		LinkedList<String> splited=operator_split(regular);
 		if(splited.size()>1) {//ako je nesto splitano
 			for(String s:splited) {
-				int[] sub=turn(new String(s),result);
+				int[] sub=turn(s,result);
 				
 				result.append(first + ",$->" + sub[0]); //spoji prvog i prvog iz rezultata podizraza
 				result.append("\n");
@@ -311,7 +325,7 @@ public class GLA {
 			}
 			++k;
 		}
-		result.add(new String(previous));
+		result.add(previous.toString());
 		return result;
 	}
 	
@@ -330,9 +344,13 @@ public class GLA {
 		int brackets=0;
 		int k=0;
 		
-		for(int j=i; j<array.length; ++j) {
-			if(array[j]==')' && is_operator(array,j) && brackets==1) 
-				return j;
+		for(int j=i+1; j<array.length; ++j) {
+			if(array[j]==')' && is_operator(array,j)) {
+				--brackets;
+				if(brackets==(-1)) {
+					return j;
+				}
+			}
 			
 			if(array[j]=='(' && is_operator(array, j)) 
 				++brackets;
@@ -346,8 +364,8 @@ public class GLA {
 		for(int k=i; k<j; ++k) {
 			sb.append(array[k]);
 		}
-		
-		return sb.toString();
+		String back=sb.toString();
+		return back;
 	}
 
 }
