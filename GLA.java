@@ -1,5 +1,3 @@
-package lab1;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -113,35 +111,36 @@ public class GLA {
 		/*
 		 * upis u izlaznu datoteku, prvo stanja i imena leksickih jedinki pa izlaze iz Seginog algoritma
 		 */
-		try {
-			File output = new File("/pomocni.txt");
-			//output.delete();
-			output.createNewFile();
-			FileOutputStream out = new FileOutputStream(output);
-			
-			out.write(states.getBytes());
-			out.write(names.getBytes());
+//		try {
+//			File output = new File("/pomocni.txt");
+//			//output.delete();
+//			output.createNewFile();
+//			FileOutputStream out = new FileOutputStream(output);
+//			
+//			out.write(states.getBytes());
+//			out.write(names.getBytes());
 			
 			int size = firsts.size();
 			for(int i = 0; i < size; i++) {
 				
-				System.gc();
-				try {
-					Thread.sleep(10);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
+//				System.gc();
+//				try {
+//					Thread.sleep(10);
+//				} catch (InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				System.out.println(firsts.get(i));
 				stageName=0;
-				out.write(e_nka_rules(firsts.get(i), rests.get(i)).getBytes());
-//				System.out.print(e_nka_rules(firsts.get(i), rests.get(i)) + "\n\n");
+				
+//				out.write(e_nka_rules(firsts.get(i), rests.get(i)).getBytes());
+				System.out.print(e_nka_rules(firsts.get(i), rests.get(i)) + "\n\n");
 			}
-			out.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//			out.close();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 /* 
  * Prihvaca npr: <S_pocetno>\n
@@ -164,7 +163,7 @@ public class GLA {
 	public static String e_nka_rules(String first, String rest) {
 		StringBuilder result = new StringBuilder();
 		
-		String[] bits=first.split(">");
+		String[] bits=first.split(">", 2);
 		result.append(bits[0]);
 		result.append(">");
 		result.append("\n");
@@ -190,6 +189,7 @@ public class GLA {
 		int previousStage=first;
 		
 		// rjesavanje 'vanjskih' ili ('|') operatora
+//		System.out.println(regular);
 		LinkedList<String> splited=operator_split(regular);
 		if(splited.size()>1) {//ako je nesto splitano
 			for(String s:splited) {
@@ -326,6 +326,16 @@ public class GLA {
 			++k;
 		}
 		result.add(previous.toString());
+//		for(String s: result)
+//			System.out.println(s);
+		
+//		System.out.println("ovdje");
+//		try {
+//			Thread.sleep(1000);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		return result;
 	}
 	
@@ -342,7 +352,6 @@ public class GLA {
 	//vraca indeks zatvorene zagrade na temelju indeksa otvorene zagrade
 	public static int closed_bracket(char[] array,int i) {
 		int brackets=0;
-		int k=0;
 		
 		for(int j=i+1; j<array.length; ++j) {
 			if(array[j]==')' && is_operator(array,j)) {
@@ -355,7 +364,7 @@ public class GLA {
 			if(array[j]=='(' && is_operator(array, j)) 
 				++brackets;
 		}
-		return k;
+		return -1;
 	}
 	
 	//i is included, j is not in the substring
