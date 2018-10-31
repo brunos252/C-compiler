@@ -111,36 +111,26 @@ public class GLA {
 		/*
 		 * upis u izlaznu datoteku, prvo stanja i imena leksickih jedinki pa izlaze iz Seginog algoritma
 		 */
-//		try {
-//			File output = new File("/pomocni.txt");
-//			//output.delete();
-//			output.createNewFile();
-//			FileOutputStream out = new FileOutputStream(output);
-//			
-//			out.write(states.getBytes());
-//			out.write(names.getBytes());
+		try {
+			File output = new File("./analizator/pomocni.txt");
+			//output.delete();
+			output.createNewFile();
+			FileOutputStream out = new FileOutputStream(output);
+			
+			out.write(states.getBytes());
+			out.write(names.getBytes());
 			
 			int size = firsts.size();
 			for(int i = 0; i < size; i++) {
-				
-//				System.gc();
-//				try {
-//					Thread.sleep(10);
-//				} catch (InterruptedException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//				System.out.println(firsts.get(i));
 				stageName=0;
-				
-//				out.write(e_nka_rules(firsts.get(i), rests.get(i)).getBytes());
-				System.out.print(e_nka_rules(firsts.get(i), rests.get(i)) + "\n\n");
+				out.write(e_nka_rules(firsts.get(i), rests.get(i)).getBytes());
+				//System.out.print(e_nka_rules(firsts.get(i), rests.get(i)) + "\n\n");
 			}
-//			out.close();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+			out.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 /* 
  * Prihvaca npr: <S_pocetno>\n
