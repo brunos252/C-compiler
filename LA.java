@@ -1,3 +1,4 @@
+package lab1;
 /*
  * Na standardni ulaz dobiva sve ili vecinu potrebnih informacija.
  * Korisit se konacnim automatima (e-nka se preporuca).
@@ -20,9 +21,9 @@ import simEnka.Action_E_NKA;
 public class LA {
 
     private static BufferedReader br;
-    private static LinkedList<Action_E_NKA> action_e_nkas;
-    private static LinkedList<String> allPosibleStates;
-    private static LinkedList<String> allPosibleActions;
+    private static LinkedList<Action_E_NKA> action_e_nkas=new LinkedList<>();
+    private static LinkedList<String> allPosibleStates=new LinkedList<>();
+    private static LinkedList<String> allPosibleActions=new LinkedList<>();
     private static String LAState;
     private static int row=1;
     private static int last=0; //index posljednjeg charactera u ulaznom textu
@@ -32,11 +33,11 @@ public class LA {
     private static int prefixLast=-1; //index zadnjeg charactera iz prepoznatog prefixa
     private static int first_h=0; //pomocna varijabla
     private static LinkedList<String> actions=new LinkedList<>();
-    private static Action_E_NKA actEnka = action_e_nkas.get(0); //samo inicijalno, predstavlja zadnji enka koji je prihvatio niz
+    private static Action_E_NKA actEnka; //samo inicijalno, predstavlja zadnji enka koji je prihvatio niz
 
     public static void main(String[] args) throws IOException {
         //Stvaranje ref na datoteku i bf readera
-        File tablica = new File("./analizator/pomocni.txt"); //ovdje bi trebalo pisati nesto u stilu \\analizator\\pomocni.txt , ovisno kak ju nazove sacaric
+        File tablica = new File("pomocni.txt"); //ovdje bi trebalo pisati nesto u stilu \\analizator\\pomocni.txt , ovisno kak ju nazove sacaric
         br = new BufferedReader(new FileReader(tablica));
 
         intializeAllPosibleStates();
@@ -45,6 +46,7 @@ public class LA {
 
         br.close();
 
+        actEnka = action_e_nkas.get(0);
         // Zadnji dio
         br=new BufferedReader(new InputStreamReader(System.in));
         String current=new String();
@@ -106,11 +108,6 @@ public class LA {
 
     @SuppressWarnings("null")
 	private static void initializeActEnkas() throws IOException {
-        //mislim da ovdje trebas primat u funkciju barem jedan veliki String koji ce u sebi sadrzavat sve za inicijalizaciju jednog enka
-        //mozda ne bi bilo lose da ti je ovo funkicja za inicjalizaciju jednog akcijskog enka, koju pozivas za svakog
-        //jer ako nije onda mislim da je problem  u "else if" dijelu zato kaj za svaki novi akcijski enka moras re-inicijalizirat
-        //sve ove mape,list,i hashove (ili popravi to ili radi funkciju da je za inicijalizaciju jednog akcijskog enka)
-
 
         //Polja potrebna za inicijalizaciju svakog ActionENKA
         LinkedList<String> action, entry = new LinkedList<>();
