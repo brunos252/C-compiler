@@ -39,6 +39,7 @@ public class LA {
         //Stvaranje ref na datoteku i bf readera
         File tablica = new File("pomocni.txt"); //ovdje bi trebalo pisati nesto u stilu \\analizator\\pomocni.txt , ovisno kak ju nazove sacaric
         br = new BufferedReader(new FileReader(tablica));
+        br.mark(0);
 
         intializeAllPosibleStates();
         initalizeAllPosibleActions();
@@ -117,6 +118,7 @@ public class LA {
         allStates = alphabet = null;
         firstState = "0";
         acceptableStates.add("1");
+        br.reset();
 
         String line;
         while ((line = br.readLine()) != null) {
@@ -158,6 +160,7 @@ public class LA {
     }
 
     private static void intializeAllPosibleStates() throws IOException {
+        br.reset();
         String line;
         while ((line = br.readLine()) != null){
             if (line.startsWith("%X")){
@@ -171,6 +174,7 @@ public class LA {
     }
 
     private static void initalizeAllPosibleActions() throws IOException {
+        br.reset();
         String line;
         while ((line = br.readLine()) != null){
             if (line.startsWith("%L")){
