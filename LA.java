@@ -36,7 +36,7 @@ public class LA {
 
     public static void main(String[] args) throws IOException {
         //Stvaranje ref na datoteku i bf readera
-        File tablica = new File(""); //ovdje bi trebalo pisati nesto u stilu \\analizator\\pomocni.txt , ovisno kak ju nazove sacaric
+        File tablica = new File("./analizator/pomocni.txt"); //ovdje bi trebalo pisati nesto u stilu \\analizator\\pomocni.txt , ovisno kak ju nazove sacaric
         br = new BufferedReader(new FileReader(tablica));
 
         intializeAllPosibleStates();
@@ -124,7 +124,7 @@ public class LA {
         String line;
         while ((line = br.readLine()) != null) {
             if (line.startsWith("<S_")) {
-                name = line;
+                name = line.substring(line.indexOf("<") + 1, line.indexOf(">"));
                 br.readLine();
                 br.readLine();
             } else if (line.startsWith("{")) {
