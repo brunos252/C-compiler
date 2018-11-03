@@ -166,6 +166,7 @@ public class LA {
                 for(int i = 1; i < states.length; i++){
                     allPosibleStates.add(states[i]);
                 }
+                break;
             }
         }
     }
@@ -178,6 +179,7 @@ public class LA {
                 for(int i = 1; i < actions.length; i++){
                     allPosibleActions.add(actions[i]);
                 }
+                break;
             }
         }
     }
