@@ -97,11 +97,9 @@ public class LA {
 	        		}
 	        	}
 	        	
-//	        	if(!result && prefixLast!=(-1)) {
-//	        		
-//	        		doActions();
-//	        		
-//	        	}
+                if(!result && prefixLast!=(-1) && String.valueOf(currentChar[currentChar.length-1]).equals(";")) {
+                    doActions();
+                }
 	        	
 	        }else if(prefixLast==(-1)){  //ako smo dosli do kraja ulaza
 	    		System.err.println("Leksicka pogreska u redu: " + row);
