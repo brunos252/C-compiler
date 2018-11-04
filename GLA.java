@@ -90,7 +90,8 @@ public class GLA {
 		String substring;
 		for(String s : rules) {
 			if(s.startsWith("<")) {
-				while((startIndex = s.indexOf("{")) != -1 && s.charAt(startIndex - 1) != '\\') {					
+				while((startIndex = s.indexOf("{")) != -1 && 
+						(s.charAt(startIndex - 1) != '\\' || s.charAt(startIndex - 1) == '\\' && s.charAt(startIndex - 2) == '\\')) {
 					endIndex = s.indexOf("}");
 					substring = s.substring(startIndex, endIndex + 1);
 					s = s.replace(substring,"("+ regularDefinitions.get(substring)+")");
