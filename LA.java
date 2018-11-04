@@ -1,4 +1,3 @@
-package lab1;
 /*
  * Na standardni ulaz dobiva sve ili vecinu potrebnih informacija.
  * Korisit se konacnim automatima (e-nka se preporuca).
@@ -11,12 +10,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.io.InputStreamReader;
 
 import simEnka.Action_E_NKA;
+import valuePair.ValuePairs;
 
 public class LA {
 
@@ -37,7 +36,7 @@ public class LA {
 
     public static void main(String[] args) throws IOException {
         //Stvaranje ref na datoteku i bf readera
-        File tablica = new File("pomocni.txt"); //ovdje bi trebalo pisati nesto u stilu \\analizator\\pomocni.txt , ovisno kak ju nazove sacaric
+        File tablica = new File("pomocni2.txt"); //ovdje bi trebalo pisati nesto u stilu \\analizator\\pomocni.txt , ovisno kak ju nazove sacaric
         br = new BufferedReader(new FileReader(tablica));
 
         intializeAllPosibleStates();
@@ -46,18 +45,27 @@ public class LA {
 
         br.close();
 
-        actEnka = action_e_nkas.get(0);
         // Zadnji dio
-        br=new BufferedReader(new InputStreamReader(System.in));
+        actEnka = action_e_nkas.get(0);
+        
+        br=new BufferedReader(new InputStreamReader(System.in));  //staviti na new InputStreamReader(System.in)
         String current=new String();
         boolean result=false;
         LinkedList<String> entry=new LinkedList<>();
         String line=new String();
-        
+        char[] currentChar;
         
         StringBuilder sb=new StringBuilder();
-        while(br.ready() && !(line=br.readLine()).isEmpty()) {  //citanje cijele datoteke
-        	sb.append(line);
+        while(br.ready()) {  //citanje cijele datoteke
+//        	line=br.readLine();
+        	
+        	int i=br.read();
+        	char c=(char) i;
+        	if(c!='\r')
+        		sb.append(c);
+        	
+//        	sb.append(line);
+//        	sb.append("\n");
         }
         
         text=sb.toString();  //stvori veliki string od cijelog ulaza
@@ -71,15 +79,19 @@ public class LA {
         	++next;  //"procitaj" sljedeceg
         	if(next<=last) { //ako je nismo dosli do kraja ulaza
 	        	current=text.substring(first, next);
-	        	entry.add(current);
+	        	currentChar=current.toCharArray();
+	        	
+	        	for(char c: currentChar) {
+	        		entry.add(String.valueOf(c));
+	        	}
 	        	
 	        	for(Action_E_NKA enka : action_e_nkas) {
 	        		if(enka.getName().equals(LAState)) {
 	        			enka.setEntry(entry);
 	        			result=enka.result();
-	        			actEnka=enka;
 	        			
 	        			if(result) {  //ispunjeno da se postuje prvo pravilo koje prihvaca niz
+	        				actEnka=enka;
 	        				prefixLast=next;
 	        				break;
 	        			}
@@ -110,11 +122,13 @@ public class LA {
 	private static void initializeActEnkas() throws IOException {
 
         //Polja potrebna za inicijalizaciju svakog ActionENKA
-        LinkedList<String> action, entry = new LinkedList<>();
-        HashSet<String> allStates, alphabet, acceptableStates = new HashSet<>();
-        HashMap<String, String> function = new HashMap<>();
+        LinkedList<String> action = new LinkedList<>();
+        LinkedList<String> entry = new LinkedList<>();
+        HashSet<String> acceptableStates = new HashSet<>();
+        HashSet<String> allStates= new HashSet<>();
+        HashSet<String> alphabet = new HashSet<>();
+        ValuePairs<String, String> function = new ValuePairs<>();
         String firstState, name = null;
-        allStates = alphabet = null;
         firstState = "0";
         acceptableStates.add("1");
 
@@ -128,22 +142,56 @@ public class LA {
                 action = extractActions();
                 action_e_nkas.add(new Action_E_NKA(entry, allStates, alphabet, acceptableStates, firstState, function,
                         name, action));
-                action.clear();
-                entry.clear();
-                allStates.clear();
-                alphabet.clear();
-                acceptableStates.clear();
-                function.clear();
+                
+                action = new LinkedList<>();
+                entry = new LinkedList<>();
+                allStates= new HashSet<>();
+                alphabet = new HashSet<>();
+                function = new ValuePairs<>();
+//                action.clear();
+//                entry.clear();
+//                allStates.clear();
+//                alphabet.clear();
+//                acceptableStates.clear();
+//                function.clear();
             } else {
-                String transitions[] = new String[2];
+                String transitions[];
                 // (5,X->7) Na indeksu nula se nalazi kobinacija stanje,znak, a na indeksu jedan novo stanje
                 transitions = line.split("->");
-                function.put(transitions[0], transitions[1]);
-                allStates.add(transitions[1]);
+//                if(function.containsKey(transitions[0]))
+//                	System.out.println("Problem!");
+                if(transitions.length<2) {
+                	line=br.readLine();
+            		String[] t = line.split("->");
+            		transitions[0]=transitions[0]+"\n";
+            		
+                	if(function.containsLeft(transitions[0])) {
+                		String s=function.getRight(transitions[0]);
+                		function.updateRight(transitions[0],s+","+t[1]);
+                		
+                	}else {
+                		function.add(transitions[0], t[1]);
+                		
+                	}
+                }else {
+                	if(function.containsLeft(transitions[0])) {
+                		String s=function.getRight(transitions[0]);
+                		function.updateRight(transitions[0],s+","+transitions[1]);
+                		allStates.add(transitions[1]);
+                		
+                	}else {
+                		function.add(transitions[0], transitions[1]);
+                		allStates.add(transitions[1]);
+                		
+                	}
+                }
+                
+                
+                
                 //Na indeksu nula se nalazi trenutno stanje, a na indeksu jedan se nalazi znak
-                transitions = transitions[0].split(",");
-                allStates.add(transitions[0]);
+                transitions = transitions[0].split(",",2);
                 alphabet.add(transitions[1]);
+                allStates.add(transitions[0]);
             }
         }
     }

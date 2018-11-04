@@ -5,34 +5,50 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeSet;
 
+import valuePair.ValuePairs;
+
 /*
  * Nije potrebno inicijalizirati polje koje sadrzi sva stanja i nije potrebno inicijalizirati
  *  stanja koja su prihvatljiva.
  */
 
 public class E_NKA {
+	@SuppressWarnings("unused")
 	private HashSet<String> allStates;
 	private HashSet<String> alphabet;
 	private HashSet<String> acceptableStates;
 	private String firstState;
 	private HashMap<String,String> function;
+	private ValuePairs<String,String> pairs;
 	private LinkedList<String> entry;
 	private TreeSet<String> currentStates;
 	private TreeSet<String> nextStates;
 	private boolean enabledSetters=true;  //omogucavanje mjenjanja definicije automata
 											//(npr ulaza) , dok automat radi to je zabranjeno
 	
+//	public E_NKA(LinkedList<String> entry, HashSet<String> allStates,
+//					HashSet<String> alphabet, HashSet<String> acceptableStates,
+//					String firstState, HashMap<String,String> function) {
+//		
+//		this.allStates=allStates;
+//		this.alphabet=alphabet;
+//		this.acceptableStates=acceptableStates;
+//		this.firstState=firstState;
+//		this.function=function;
+//		this.entry=entry;
+//	}
+	
 	public E_NKA(LinkedList<String> entry, HashSet<String> allStates,
-					HashSet<String> alphabet, HashSet<String> acceptableStates,
-					String firstState, HashMap<String,String> function) {
-		
+			HashSet<String> alphabet, HashSet<String> acceptableStates,
+			String firstState, ValuePairs<String,String> pairs) {
+
 		this.allStates=allStates;
 		this.alphabet=alphabet;
 		this.acceptableStates=acceptableStates;
 		this.firstState=firstState;
-		this.function=function;
+		this.pairs=pairs;
 		this.entry=entry;
-	}
+}
 	
 	public LinkedList<String> getEntry() {
 		if(enabledSetters==false) {
@@ -53,6 +69,7 @@ public class E_NKA {
 	
 	
 	/*
+	 * mora biti koristen prvi konstruktor
 	 * Ako se nad istim e-nka pozove vise funkcija run(), sa istim ili razlicitim ulazom, e-nka ce raditi ispravno
 	 * jer se na pocetku svakog pocetka rada e-nka on resetira i ne pamti prijasnje rezultate.
 	 */
@@ -109,7 +126,7 @@ public class E_NKA {
 				
 				for(String o: currentStates) {           //za svaki ulazni znak idemo po svim trenutnim stanjima i 
 					String key = new String(o + "," + e);		//stvaramo string "TrenutnoStanje,ulaz" i provjeravamo
-					if(function.containsKey( key )) {			//postoji li kljuc za tu kombinaciju
+					if(pairs.containsLeft(key)) {			//postoji li kljuc za tu kombinaciju
 					
 						List<String> epsilon=findNewStates(e, o,currentStates);	//nadji sva stanja u koja prelazi s tim ulazom       
 						if(!epsilon.isEmpty())  						//i stavi ih u listu sljedecih stanja
@@ -153,6 +170,8 @@ public class E_NKA {
 		enabledSetters=true;
 	}
 	
+	
+	//mora biti koristen drugi konsturktor
 	//funkcija vraca krajnji rezultat rada automata, tj. true ako se niz prihvaca ili
 	//false ako se niz ne prihvaca.
 	//naravno rezultat se odnosi na zadnji niz ulaznih znakova!
@@ -169,7 +188,9 @@ public class E_NKA {
 			
 		for(String e : entry) {
 			if(!alphabet.contains(e)) {			// AKO NEPOSTOJI BACI IZNIMKU
-				throw new IllegalArgumentException("Ulazni znak ne postoji za ovaj Epsilon NKA!");
+//				throw new IllegalArgumentException("Ulazni znak ne postoji za ovaj Epsilon NKA!");
+				enabledSetters=true;
+				return false;
 			}
 			
 			if(e.equals("|")) {                    //za sljedeci ulazni skup ide novi red, i novi set sa pocetnim stanjem
@@ -186,7 +207,7 @@ public class E_NKA {
 				
 				for(String o: currentStates) {           //za svaki ulazni znak idemo po svim trenutnim stanjima i 
 					String key = new String(o + "," + e);		//stvaramo string "TrenutnoStanje,ulaz" i provjeravamo
-					if(function.containsKey( key )) {			//postoji li kljuc za tu kombinaciju
+					if(pairs.containsLeft( key )) {			//postoji li kljuc za tu kombinaciju
 					
 						List<String> epsilon=findNewStates(e, o,currentStates);	//nadji sva stanja u koja prelazi s tim ulazom       
 						if(!epsilon.isEmpty())  						//i stavi ih u listu sljedecih stanja
@@ -233,8 +254,8 @@ public class E_NKA {
 		
 		//#1 provjeravamo prvo epsilon prijelaze iz pocetnog stanja, a onda i  svih koji su iz pocetnog (epsilon okolina)
 		String key=new String(currentState + ",$");
-		if(function.containsKey(key)) {		//stvaranje meta liste i ako postoji onda trazimo ostale epsilon prijelaze
-			String[] strings=function.get(key).split(",");	//ako je vise stanja 
+		if(pairs.containsLeft(key)) {		//stvaranje meta liste i ako postoji onda trazimo ostale epsilon prijelaze
+			String[] strings=pairs.getRight(key).split(",");	//ako je vise stanja 
 			for(String s: strings) {		//sve ih stavi u meta
 				//if(!forbidden_epsilon.contains(s)) {
 					metaStates.add(s);
@@ -247,9 +268,9 @@ public class E_NKA {
 				
 				for(String m: metaStates) {
 					key=new String(m + ",$");
-					if(function.containsKey(key)) {
+					if(pairs.containsLeft(key)) {
 						
-						strings=function.get(key).split(",");
+						strings=pairs.getRight(key).split(",");
 						/*if(!metaStates.contains(function.get(key)))
 							metaStates.add(function.get(key)); */
 						for(String s: strings) {			//u izlaznu listu
@@ -280,9 +301,9 @@ public class E_NKA {
 		
 		for(String curr: metaStates) {
 			key=new String(curr + "," + entry);
-			if(function.containsKey(key)) {
+			if(pairs.containsLeft(key)) {
 				
-				strings=function.get(key).split(",");
+				strings=pairs.getRight(key).split(",");
 				for(String s: strings) {			//u izlaznu listu
 					if(!epsilon.contains(s) && !s.equals(new String("#"))) { //ako je prijelaz u nista ne dodavaj ga
 						epsilon.add(s);
@@ -309,9 +330,9 @@ public class E_NKA {
 			
 			for(String m: metaStates) {
 				key=new String(m + ",$");
-				if(function.containsKey(key)) {
+				if(pairs.containsLeft(key)) {
 					
-					strings=function.get(key).split(",");
+					strings=pairs.getRight(key).split(",");
 					/*if(!metaStates.contains(function.get(key)))
 						metaStates.add(function.get(key)); */
 					for(String s: strings) {			//u izlaznu listu

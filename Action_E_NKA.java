@@ -1,6 +1,7 @@
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+
+import valuePair.ValuePairs;
 
 
 /*
@@ -10,8 +11,8 @@ public class Action_E_NKA extends E_NKA{
 	private String name;
 	private LinkedList<String> action;
 
-	public Akcijski_E_NKA(LinkedList<String> entry, HashSet<String> allStates, HashSet<String> alphabet,
-			HashSet<String> acceptableStates, String firstState, HashMap<String, String> function,
+	public Action_E_NKA(LinkedList<String> entry, HashSet<String> allStates, HashSet<String> alphabet,
+			HashSet<String> acceptableStates, String firstState, ValuePairs<String, String> function,
 			String name, LinkedList<String> action) {
 		super(entry, allStates, alphabet, acceptableStates, firstState, function);
 		
