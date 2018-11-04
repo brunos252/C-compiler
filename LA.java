@@ -36,7 +36,7 @@ public class LA {
 
     public static void main(String[] args) throws IOException {
         //Stvaranje ref na datoteku i bf readera
-        File tablica = new File("pomocni2.txt"); //ovdje bi trebalo pisati nesto u stilu \\analizator\\pomocni.txt , ovisno kak ju nazove sacaric
+        File tablica = new File("pomocni.txt"); //ovdje bi trebalo pisati nesto u stilu \\analizator\\pomocni.txt , ovisno kak ju nazove sacaric
         br = new BufferedReader(new FileReader(tablica));
 
         intializeAllPosibleStates();
@@ -52,7 +52,6 @@ public class LA {
         String current=new String();
         boolean result=false;
         LinkedList<String> entry=new LinkedList<>();
-        String line=new String();
         char[] currentChar;
         
         StringBuilder sb=new StringBuilder();
@@ -98,11 +97,11 @@ public class LA {
 	        		}
 	        	}
 	        	
-	        	if(!result && prefixLast!=(-1)) {
-	        		
-	        		doActions();
-	        		
-	        	}
+//	        	if(!result && prefixLast!=(-1)) {
+//	        		
+//	        		doActions();
+//	        		
+//	        	}
 	        	
 	        }else if(prefixLast==(-1)){  //ako smo dosli do kraja ulaza
 	    		System.err.println("Leksicka pogreska u redu: " + row);
@@ -118,7 +117,6 @@ public class LA {
         br.close();
     }
 
-    @SuppressWarnings("null")
 	private static void initializeActEnkas() throws IOException {
 
         //Polja potrebna za inicijalizaciju svakog ActionENKA
@@ -233,6 +231,9 @@ public class LA {
     }
     
     private static void doActions() {
+    	String keyWord=new String("Greska");
+    	Boolean wordExists=false;
+    	
     	first_h=first;
 		next=prefixLast;  //vracanje na zadnji prepoznati prefix
 		String current=text.substring(first,prefixLast); //prepoznati prefix
@@ -252,14 +253,20 @@ public class LA {
 			case "VRATI_SE": prefixLast=first_h + Integer.parseInt(splitted[1]); //prefix last je zadnji kojeg cemo prepoznat, a u slucaju VRATI_SE
 				next=prefixLast;  //vracanje na zadnji prepoznati prefix			// to mora biti samo vrati_se znakova
 				first=first_h;
+				current=text.substring(first,prefixLast); //prepoznati prefix promijenjen, tj vracen nazad
+				
+				first+=Integer.parseInt(splitted[1]);
 				break;																	
 			
-			default: System.out.println(splitted[0] + " " + row + " " + current);	//inace ispis sve sto treba na stdin
+			default: keyWord=splitted[0];	//inace ispis sve sto treba na stdin
+				wordExists=true;
 				first=prefixLast;
 				prefixLast=-1;
 				break;
 			}
 		}
+		if(wordExists)
+			System.out.println(keyWord + " " + row + " " + current);
     }
 
 }

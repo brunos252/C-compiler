@@ -122,6 +122,9 @@ public class GLA {
 			
 			int size = firsts.size();
 			for(int i = 0; i < size; i++) {
+				
+//				System.out.println(firsts.get(i));
+				
 				stageName=0;
 				out.write(e_nka_rules(firsts.get(i), rests.get(i)).getBytes());
 				//System.out.print(e_nka_rules(firsts.get(i), rests.get(i)) + "\n\n");
