@@ -112,7 +112,7 @@ public class GSA {
 		/*
 		 * prijelazi su oblika: left: <stanje>	,	ulazniZnak
 		 * 					   right: <stanje>
-		 * gdje je <stanje> oblika <A> 	->	*	a	b	,	{	c	d	}		(kao u knjizi)
+		 * gdje je <stanje> oblika <A> 	->	*	a	b	{	c	d	}		(kao u knjizi)
 		 */
 		
 		//dodavanje pocetnog stanja
