@@ -1,6 +1,8 @@
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Zapocinje {
 	private List<String> zavrsni;
@@ -27,8 +29,26 @@ public class Zapocinje {
 	}
 	
 	/*
-	 * racuna skup ZAPOCINJE(<X>)
+	 * racuna skup ZAPOCINJE(<X>), dvije su funkcije istog naziva a razlikuju se u argumentima;
+	 * ova koja prima List<String> poziva ovu drugu koja prima samo jedan String odnosno znak
 	 */
+	public Set<String> izracunajZapocinje(List<String> list) {
+		Set<String> set = new HashSet<>();
+		for(String znak : list) {
+			if(zavrsni.contains(znak)) {
+				set.add(znak);
+				return set;
+			} else {
+				set.addAll(izracunajZapocinje(znak));
+			}
+			if(!prazni.contains(znak)) 
+				break;
+		}
+		
+		return set;
+	}
+	
+	
 	public List<String> izracunajZapocinje(String entry) {
 		List<String> ZAPOCINJE = new ArrayList<String>();
 		int index = nezavrsni.indexOf(entry);
@@ -140,7 +160,7 @@ public class Zapocinje {
 				}
 			}
 		}
-		System.out.println("prazni: " + prazni);
+		System.out.println("prazni znakovi: " + prazni);
 
 	}
 }
