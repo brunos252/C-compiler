@@ -1,7 +1,7 @@
 import java.util.LinkedList;
 
 public class ValuePairs<T,K> {
-	private LinkedList<Pair<T,K>> list;
+	LinkedList<Pair<T,K>> list;
 	
 	public ValuePairs() {
 		list = new LinkedList<>();
