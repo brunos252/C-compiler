@@ -85,7 +85,7 @@ public class GSA {
 		for(String s : nezavrsni)
 			System.out.println(s + " : " + z.izracunajZapocinje(s));
 		
-		buildDemTables(productions, nezavrsni, z);
+		buildENKA(productions, nezavrsni, z);
 		
 		/*System.out.println();
 		System.out.println("sve produkcije (zanemari okomite crte na kraju redova) :");
@@ -102,7 +102,7 @@ public class GSA {
 		}*/
 	}
 	
-	public static void buildDemTables(Map<String, List<List<String>>> productions, List<String> nezavrsni, Zapocinje z) {
+	public static void buildENKA(Map<String, List<List<String>>> productions, List<String> nezavrsni, Zapocinje z) {
 		ValuePairs<List<String>, List<String>> prijelazi = new ValuePairs<>();
 		List<List<String>> stanja = new LinkedList<List<String>>();			//LR(1) stavke odnosno LRstavke + skup zavrsnih znakova
 		//List<String> ulazniZnakovi = new LinkedList<String>();
@@ -112,7 +112,7 @@ public class GSA {
 		/*
 		 * prijelazi su oblika: left: <stanje>	,	ulazniZnak
 		 * 					   right: <stanje>
-		 * gdje je <stanje> oblika <A> 	->	*	a	b	{	c	d	}		(kao u knjizi)
+		 * gdje je <stanje> oblika <A> 	->	*	a	b	,	{	c	d	}		(kao u knjizi)
 		 */
 		
 		//dodavanje pocetnog stanja
@@ -126,8 +126,7 @@ public class GSA {
 		while(promjena) {
 			promjena = false;
 			for(int i = 0; i < stanja.size(); i++) {
-				List<String> stanje = new ArrayList<>();
-				stanje.addAll(stanja.get(i));
+				List<String> stanje = stanja.get(i);
 				left = new ArrayList<String>();
 				right = new ArrayList<String>();
 				int indtocke = stanje.indexOf("*");
@@ -139,7 +138,9 @@ public class GSA {
 					right.addAll(stanje);
 					right.remove(indtocke);
 					right.add(indtocke + 1, "*");
-					prijelazi.add(left, right);
+					Pair<List<String>, List<String>> par = new Pair<List<String>, List<String>>(left, right);
+					if(!(prijelazi.containsPair(par)))
+						prijelazi.addPair(par);
 					if(!stanja.contains(right)) {
 						stanja.add(right);
 						promjena = true;
@@ -170,7 +171,9 @@ public class GSA {
 								right.addAll(T);
 								right.add("}");
 							}
-							prijelazi.add(left, right);
+							Pair<List<String>, List<String>> par2 = new Pair<List<String>, List<String>>(left, right);
+							if(!(prijelazi.containsPair(par2)))
+								prijelazi.addPair(par2);
 							if(!stanja.contains(right)) {
 								stanja.add(right);
 								promjena = true;
@@ -207,6 +210,6 @@ public class GSA {
 			}
 			System.out.print("]");
 			System.out.println();
-		}		
+		}
 	}
 }
