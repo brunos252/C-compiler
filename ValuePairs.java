@@ -1,6 +1,7 @@
+import java.util.Iterator;
 import java.util.LinkedList;
 
-public class ValuePairs<T,K> {
+public class ValuePairs<T,K> implements Iterable<Pair<T,K>>{
 	private LinkedList<Pair<T,K>> list;
 	
 	public ValuePairs() {
@@ -64,5 +65,14 @@ public class ValuePairs<T,K> {
 			if(p.getLeft().equals(left))
 				p.setRight(right);
 		}
+	}
+
+	@Override
+	public Iterator<Pair<T, K>> iterator() {
+		return this.list.iterator();
+	}
+	
+	public int size() {
+		return this.list.size();
 	}
 }

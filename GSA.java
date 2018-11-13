@@ -196,8 +196,8 @@ public class GSA {
 		
 		//ispis prijelaza
 		System.out.println();
-		System.out.println("prijelazi: " + prijelazi.list.size());
-		for(Pair<List<String>, List<String>> pair : prijelazi.list) {
+		System.out.println("prijelazi: " + prijelazi.size());
+		for(Pair<List<String>, List<String>> pair : prijelazi) {
 			System.out.print("[");
 			for(String s : pair.getLeft()) {
 				if(s.equals(","))
