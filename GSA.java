@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -28,6 +29,7 @@ public class GSA {
 		String line, leftSide = null;
 		boolean prod = false;
 		
+		long start;
 		/*
 		 * cita ulazne podatke:
 		 * %V - nezavrsni znakovi
@@ -92,6 +94,7 @@ public class GSA {
 		
 		LinkedList<String> prijelazi = buildENKA(productions, nezavrsni, z);
 		
+		start=System.currentTimeMillis();
 		//drugi dio
 		ValuePairs<String,String> pairs=new ValuePairs<>();
 		String[] bits1;
@@ -147,7 +150,7 @@ public class GSA {
 				prijelaziNKA.add(bits2[0]+","+bits2[1],sb.toString());
 			}
 		}
-		
+		System.out.println("Prvi dio traje: "+(System.currentTimeMillis()-start));
 //		System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
 //		for(Pair<String,String> p : prijelaziNKA) {
 //			System.out.println(p.getLeft()+"->"+p.getRight());
@@ -217,6 +220,8 @@ public class GSA {
 		ValuePairs<String,String> novoStanje = new ValuePairs<>();
 		char[] viticaste=null;
 		
+		start=System.currentTimeMillis();
+		
 		int i=0;
 		for(Pair<String,String> prijelaz: prijelaziNKA) {
 			bits=prijelaz.getRight().split(",");
@@ -225,13 +230,15 @@ public class GSA {
 				viticaste=s.substring(s.indexOf("{")+1,s.length()-2).toCharArray();
 				if(s.contains("*{")) {
 					if(s.contains("->*{")) {
-						for(char c: viticaste)
+						for(char c: viticaste) {
 							if(!akcija.containsLeft(String.valueOf(i)+","+c))
 								akcija.add(String.valueOf(i)+","+c, "r("+ s.substring(1,6) +"$)");
 							else
 								akcija.updateRight(String.valueOf(i)+","+c,  "r("+ s.substring(1,6) +"$)");
+						}
+						break;
 					}else {
-						for(char c: viticaste)
+						for(char c: viticaste) {
 							if(c=='#' && viticaste.length==1 && s.substring(1,5).equals(first.substring(1, 5))) {
 								if(!akcija.containsLeft(String.valueOf(i)+","+c))
 									akcija.add(String.valueOf(i)+","+c, "PRIHVATI");
@@ -243,6 +250,8 @@ public class GSA {
 								else
 									akcija.updateRight(String.valueOf(i)+","+c, "r("+ s.substring(1,s.indexOf("*")) +")");
 							}
+						}
+						break;
 					}
 				}
 			}
@@ -261,6 +270,8 @@ public class GSA {
 							akcija.add(String.valueOf(i)+","+n, "p("+String.valueOf(j)+")");
 						else
 							akcija.updateRight(String.valueOf(i)+","+n, "p("+String.valueOf(j)+")");
+						
+						break;
 					}
 				}
 			}
@@ -280,11 +291,15 @@ public class GSA {
 							novoStanje.add(String.valueOf(i)+","+ne, "s("+String.valueOf(j)+")");
 						else
 							novoStanje.updateRight(String.valueOf(i)+","+ne, "s("+String.valueOf(j)+")");
+						
+						break;
 					}
 				}
 			}
 			++i;
 		}
+		
+		System.out.println("Drugi dio traje: "+(System.currentTimeMillis()-start));
 		
 //		System.out.println("########################################");
 //		for(Pair<String,String> p : prijelaziNKA) {
