@@ -9,7 +9,7 @@ public class Zapocinje {
 	private List<String> nezavrsni;
 	private List<String> prazni;
 	private int[][] table;
-	Map<String, List<List<String>>> productions;
+	private Map<String, List<List<String>>> productions;
 	
 	/* KAJ OVO ZNACI?
 	 * "Za potrebe generiranja LR(1) parsera potrebno je prosiriti domenu ZAPOCINJE skupova sa
@@ -86,23 +86,23 @@ public class Zapocinje {
 				}
 			}
 		}
-		int retci2 = table.length;
-		int stupci2 = table[0].length;
-		System.out.println("zapocinjeZnakom: ");
-		System.out.print("               ");
-		for(String s : nezavrsni)
-			System.out.printf("%15s", s);
-		for(String s : zavrsni)
-			System.out.printf("%15s", s);
-		System.out.println();
-		for(int i = 0; i < retci2; i++) {
-			System.out.printf("%15s ", nezavrsni.get(i));
-			for(int j = 0; j < stupci2; j++) {
-				System.out.printf("%15d", table[i][j]);
-			}
-			System.out.println();
-		}
-		System.out.println();
+//		int retci2 = table.length;
+//		int stupci2 = table[0].length;
+//		System.out.println("zapocinjeZnakom: ");
+//		System.out.print("               ");
+//		for(String s : nezavrsni)
+//			System.out.printf("%15s", s);
+//		for(String s : zavrsni)
+//			System.out.printf("%15s", s);
+//		System.out.println();
+//		for(int i = 0; i < retci2; i++) {
+//			System.out.printf("%15s ", nezavrsni.get(i));
+//			for(int j = 0; j < stupci2; j++) {
+//				System.out.printf("%15d", table[i][j]);
+//			}
+//			System.out.println();
+//		}
+//		System.out.println();
 	}
 	
 	private void zapocinjeIzravnoZnakom() {
@@ -160,7 +160,7 @@ public class Zapocinje {
 				}
 			}
 		}
-		System.out.println("prazni znakovi: " + prazni);
+//		System.out.println("prazni znakovi: " + prazni);
 
 	}
 }
