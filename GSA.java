@@ -1,15 +1,17 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
 
 import valuePair.Pair;
 import valuePair.ValuePairs;
@@ -94,7 +96,6 @@ public class GSA {
 		
 		LinkedList<String> prijelazi = buildENKA(productions, nezavrsni, z);
 		
-		start=System.currentTimeMillis();
 		//drugi dio
 		ValuePairs<String,String> pairs=new ValuePairs<>();
 		String[] bits1;
@@ -150,7 +151,6 @@ public class GSA {
 				prijelaziNKA.add(bits2[0]+","+bits2[1],sb.toString());
 			}
 		}
-		System.out.println("Prvi dio traje: "+(System.currentTimeMillis()-start));
 //		System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
 //		for(Pair<String,String> p : prijelaziNKA) {
 //			System.out.println(p.getLeft()+"->"+p.getRight());
@@ -219,8 +219,6 @@ public class GSA {
 		ValuePairs<String,String> akcija = new ValuePairs<>();
 		ValuePairs<String,String> novoStanje = new ValuePairs<>();
 		char[] viticaste=null;
-		
-		start=System.currentTimeMillis();
 		
 		int i=0;
 		for(Pair<String,String> prijelaz: prijelaziNKA) {
@@ -306,16 +304,24 @@ public class GSA {
 //			System.out.println(p.getLeft()+"->"+p.getRight());
 //		}
 //		
-		System.out.println("Akcije:");
-//		System.out.println("########################################");
-		for(Pair<String,String> p : akcija) {
-			System.out.println(p.getLeft()+"->"+p.getRight());
-		}
-		System.out.println();
-		System.out.println("Nova stanja:");
-//		System.out.println("########################################");
-		for(Pair<String,String> p : novoStanje) {
-			System.out.println(p.getLeft()+"->"+p.getRight());
+		try {
+			File output = new File("./analizator/pomocni.txt");
+			output.createNewFile();
+			Writer writer= new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output)));
+			
+			System.out.println("Akcije:");
+			for(Pair<String,String> p : akcija) {
+				writer.write(p.getLeft()+"->"+p.getRight());
+			}
+			
+			System.out.println("Nova stanja:");
+			for(Pair<String,String> p : novoStanje) {
+				writer.write(p.getLeft()+"->"+p.getRight());
+			}
+			
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		
 	}
