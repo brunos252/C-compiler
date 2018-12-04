@@ -551,15 +551,27 @@ public class GSA {
                 		sb.append(" ");
                 }
             }
-            System.out.println("sb: " + sb);
+            viticaste = first = false;
             sb.append("-->[");
             for(String s : pair.getRight()) {
+                if(s.equals("{")) {
+                	viticaste = true;
+                	first = true;
+                } else if(s.equals("}")) {
+                	viticaste = false;
+                	sb.deleteCharAt(sb.length() - 1);
+                }
                 sb.append(s);
+                if(viticaste) {
+                	if(first)
+                		first = false;
+                	else
+                		sb.append(" ");
+                }
             }
             sb.append("]");
-
             result.add(sb.toString());
         }
-        return result;
+        return result;        
     }
 }
