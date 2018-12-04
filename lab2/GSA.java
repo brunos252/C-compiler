@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 
+
 /*
  * Generira sintaksni analizator pomocu podataka dobivenih na standardnom ulazu (zapravo samo nadopunjuje
  * kod vec postojeceg sintaksnog analizatora)
@@ -216,17 +217,17 @@ public class GSA {
 //		String[] novoStanje = new String[(nezavrsniBezPocetnog.size())*prijelaziNKA.size()];
         ValuePairs<String,String> akcija = new ValuePairs<>();
         ValuePairs<String,String> novoStanje = new ValuePairs<>();
-        char[] viticaste=null;
+        String[] viticaste=null;
 
         int i=0;
         for(Pair<String,String> prijelaz: prijelaziNKA) {
             bits=prijelaz.getRight().split(",");
 
             for(String s: bits) { //reduciraj produkcije i prihvati produkcija
-                viticaste=s.substring(s.indexOf("{")+1,s.length()-2).toCharArray();
+                viticaste=s.substring(s.indexOf("{")+1,s.length()-2).split(" ");
                 if(s.contains("*{")) {
                     if(s.contains("->*{")) {
-                        for(char c: viticaste) {
+                        for(String c: viticaste) {
                             if(!akcija.containsLeft(String.valueOf(i)+","+c))
                                 akcija.add(String.valueOf(i)+","+c, "r("+ s.substring(1,6) +"$)");
                             else
@@ -234,8 +235,8 @@ public class GSA {
                         }
                         break;
                     }else {
-                        for(char c: viticaste) {
-                            if(c=='#' && viticaste.length==1 && s.substring(1,5).equals(first.substring(1, 5))) {
+                        for(String c: viticaste) {
+                            if(c.equals("#") && viticaste.length==1 && s.substring(1,5).equals(first.substring(1, 5))) {
                                 if(!akcija.containsLeft(String.valueOf(i)+","+c))
                                     akcija.add(String.valueOf(i)+","+c, "PRIHVATI");
                                 else
@@ -297,11 +298,21 @@ public class GSA {
 
 //        System.out.println("Drugi dio traje: "+(System.currentTimeMillis()-start));
 
-//		System.out.println("########################################");
+//	System.out.println("########################################");
 //		for(Pair<String,String> p : prijelaziNKA) {
 //			System.out.println(p.getLeft()+"->"+p.getRight());
 //		}
 //
+//        System.out.print("Akcije:\r\n");
+//        for(Pair<String,String> p : akcija) {
+//        	System.out.print(p.getLeft()+"->"+p.getRight()+"\r\n");
+//		}
+//		
+//        System.out.print("Nova stanja:\r\n");
+//		for(Pair<String,String> p : novoStanje) {
+//			System.out.print(p.getLeft()+"->"+p.getRight()+"\r\n");
+//		}
+
         try {
 			File output = new File("./analizator/pomocni.txt");
 			output.createNewFile();
