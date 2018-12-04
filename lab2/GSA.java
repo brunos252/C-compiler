@@ -29,7 +29,7 @@ public class GSA {
         String line, leftSide = null;
         boolean prod = false;
 
-        long start;
+        //long start;
         /*
          * cita ulazne podatke:
          * %V - nezavrsni znakovi
@@ -87,10 +87,10 @@ public class GSA {
         //inicijalizacija klase koja racuna ZAPOCINJE skupove
         Zapocinje z = new Zapocinje(zavrsni, nezavrsni, productions);
 
-//		System.out.println();
-//		System.out.println("ZAPOCINJE skupovi nezavrsnih znakova: ");
-//		for(String s : nezavrsni)
-//			System.out.println(s + " : " + z.izracunajZapocinje(s));
+		//System.out.println();
+		//System.out.println("ZAPOCINJE skupovi nezavrsnih znakova: ");
+		//for(String s : nezavrsni)
+			//System.out.println(s + " : " + z.izracunajZapocinje(s));
 
         LinkedList<String> prijelazi = buildENKA(productions, nezavrsni, z);
 
@@ -528,13 +528,30 @@ public class GSA {
         LinkedList<String> result = new LinkedList<>();
         for(Pair<List<String>, List<String>> pair : prijelazi) {
             StringBuilder sb = new StringBuilder();
-
+            boolean viticaste = false;
+            boolean first = false;
+            
             sb.append("[");
             for(String s : pair.getLeft()) {
                 if(s.equals(","))
                     sb.append("]");
+                if(s.equals("{")) {
+                	viticaste = true;
+                	first = true;
+                }
+                else if(s.equals("}")) {
+                	viticaste = false;
+                	sb.deleteCharAt(sb.length() - 1);
+                }
                 sb.append(s);
+                if(viticaste) {
+                	if(first)
+                		first = false;
+                	else
+                		sb.append(" ");
+                }
             }
+            System.out.println("sb: " + sb);
             sb.append("-->[");
             for(String s : pair.getRight()) {
                 sb.append(s);
@@ -543,7 +560,6 @@ public class GSA {
 
             result.add(sb.toString());
         }
-
         return result;
     }
 }
