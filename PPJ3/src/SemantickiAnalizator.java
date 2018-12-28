@@ -77,9 +77,16 @@ public class SemantickiAnalizator {
        return pretraziTabZnakova(jedinka, trenutni_cvor_znak.getroditelj());
     }
 
-    private String provjeriTrenCvZnakova(){
-        //TODO
-        return "";
+    private identifikator provjeriTrenCvZnakova(Cvor jedinka, CvorZn trenutni_cvor_znak)
+    {
+    	for(identifikator IDN: trenutni_cvor_znak.getidentifikatori())
+        {
+        	if(jedinka.getjedinkaime().equals(IDN.getime()))
+        	{
+        		return IDN;
+        	}
+        }
+    	return null;
     }
 
     private boolean imaMain(){
