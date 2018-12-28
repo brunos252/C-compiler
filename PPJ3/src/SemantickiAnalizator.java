@@ -89,8 +89,29 @@ public class SemantickiAnalizator {
     	return null;
     }
 
-    private boolean imaMain(){
-        //TODO
+  private boolean imaMain(CvorZn korijen_znakova)
+    {
+    	boolean ima=false;
+    	
+    	for(identifikator IDN:korijen_znakova.getidentifikatori())
+    	{
+    		if(IDN.getime().equals("main"))
+    		{
+    			LinkedList<String> test=new LinkedList<>();
+    			test.add("fun");
+    			test.add("int");
+    			test.add("void");
+    			if(IDN.gettip().equals(test))
+    			{
+    				ima=true;
+    			}
+    		}
+    	}
+    	if(!ima)
+    	{
+    		System.out.println("main");
+    		System.exit(0);
+    	}
         return true;
     }
 
