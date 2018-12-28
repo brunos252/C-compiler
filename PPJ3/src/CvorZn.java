@@ -5,7 +5,7 @@ public class CvorZn {
         CvorZn roditelj;
         LinkedList<identifikator> identifikatori;
         LinkedList<CvorZn> djeca;
-        CvorZn uDjelokrugu;
+        LinkedList<String> uDjelokrugu;
 
         void dodajDjete(CvorZn cvor){
             this.djeca.add(cvor);
