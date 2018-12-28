@@ -115,9 +115,24 @@ public class SemantickiAnalizator {
         return true;
     }
 
-    private boolean provjeriFun(){
-        //TODO
-        return true;
+  private boolean provjeriFun(CvorZn korijen_znakova)
+    {
+    	for(identifikator IDN:korijen_znakova.getidentifikatori())
+    	{
+    		if(IDN.gettip().get(0).equals("fun"))
+    		{
+    			if(IDN.getDD()!=1)
+    			{
+    				System.out.println("funkcija");
+    				System.exit(0);
+    			}
+    		}
+    	}
+    	for(CvorZn baby:korijen_znakova.getdjeca())
+    	{
+    		provjeriFun(baby);
+    	}
+    	return true;
     }
 
     private void provjeri(){
