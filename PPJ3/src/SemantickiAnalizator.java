@@ -10,31 +10,31 @@ public class SemantickiAnalizator {
     	{
     		return true;
     	}
-    	if(tip1.get(0).equals("const_int") & tip2.get(0).equals("int"))
+    	if(tip1.get(0).equals("const_int")&& tip2.get(0).equals("int"))
     	{
     		return true;
     	}
-    	if(tip1.get(0).equals("int")&tip2.get(0).equals("const_int"))
+    	if(tip1.get(0).equals("int")&&tip2.get(0).equals("const_int"))
     	{
     		return true;
     	}
-    	if(tip1.get(0).equals("const_char")&tip2.get(0).equals("char"))
+    	if(tip1.get(0).equals("const_char")&&tip2.get(0).equals("char"))
     	{
     		return true;
     	}
-    	if(tip1.get(0).equals("char")&tip2.get(0).equals("const_char"))
+    	if(tip1.get(0).equals("char")&&tip2.get(0).equals("const_char"))
     	{
     		return true;
     	}
-    	if(tip1.get(0).equals("char")&tip2.get(0).equals("int"))
+    	if(tip1.get(0).equals("char")&&tip2.get(0).equals("int"))
     	{
     		return true;
     	}
-    	if(tip1.get(0).equals("niz")&tip1.get(1).equals("int")&tip2.get(0).equals("niz")&tip2.get(1).equals("const_int"))
+    	if(tip1.get(0).equals("niz")&&tip1.get(1).equals("int")&&tip2.get(0).equals("niz")&&tip2.get(1).equals("const_int"))
     	{
     		return true;
     	}
-    	if(tip1.get(0).equals("niz")&tip1.get(1).equals("char")&tip2.get(0).equals("niz")&tip2.get(1).equals("const_char"))
+    	if(tip1.get(0).equals("niz")&&tip1.get(1).equals("char")&&tip2.get(0).equals("niz")&&tip2.get(1).equals("const_char"))
     	{
     		return true;
     	}
