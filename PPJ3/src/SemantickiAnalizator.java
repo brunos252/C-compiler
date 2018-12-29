@@ -1,8 +1,8 @@
 import java.util.LinkedList;
 
-import hehe.Cvor;
-import hehe.CvorZn;
-import hehe.CvorZn.identifikator;
+import Cvor;
+import CvorZn;
+import CvorZn.identifikator;
 
 public class SemantickiAnalizator {
 
