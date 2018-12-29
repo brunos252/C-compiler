@@ -2,6 +2,7 @@ import java.util.LinkedList;
 
 import Cvor;
 import CvorZn;
+import CvorZn.identifikator;
 
 public class SemantickiAnalizator {
 
