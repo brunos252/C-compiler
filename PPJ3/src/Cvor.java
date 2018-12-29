@@ -1,6 +1,5 @@
 import java.util.LinkedList;
 
-import java.util.LinkedList;
 
 public class Cvor {
 
@@ -15,9 +14,19 @@ public class Cvor {
 		this.tip = tip;
 	}
 	
+	public LinkedList<String> gettip()
+	{
+		return this.tip;
+	}
+	
 	public void setl_izraz(boolean izraz)
 	{
 		this.l_izraz=izraz;
+	}
+	
+	public boolean getl_izraz()
+	{
+		return this.l_izraz;
 	}
 	
 	public LinkedList<Cvor> getdjeca()
@@ -58,7 +67,7 @@ public class Cvor {
         //TODO
     }
 
-    private class lexJed
+    public class lexJed
     {
         String IDN, ime;
         int raz;
@@ -76,5 +85,3 @@ public class Cvor {
             return this.IDN + " " + this.raz + " " + this.ime;
         }
     }
-}
-
