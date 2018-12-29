@@ -1,7 +1,5 @@
 import java.util.LinkedList;
 
-import java.util.LinkedList;
-
 public class CvorZn {
 
         CvorZn roditelj;
@@ -69,4 +67,3 @@ public class CvorZn {
         }
     }
 }
-
