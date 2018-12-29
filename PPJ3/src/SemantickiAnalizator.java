@@ -1,3 +1,8 @@
+import java.util.LinkedList;
+
+import Cvor;
+import CvorZn;
+
 public class SemantickiAnalizator {
 
     public static void main(String[] args) {
