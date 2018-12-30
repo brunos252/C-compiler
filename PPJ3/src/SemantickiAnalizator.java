@@ -1,4 +1,3 @@
-import java.util.LinkedList;
 
 import java.util.LinkedList;
 
@@ -6,7 +5,9 @@ import Cvor;
 import CvorZn;
 import CvorZn.identifikator;
 
-public class SemantickiAnalizator {
+public class SemantickiAnalizator 
+{
+	public static int u_petlji=0;
 
     public static void main(String[] args) {
 	// write your code here
@@ -552,9 +553,245 @@ public class SemantickiAnalizator {
     			greska(trenutni_cvor);
     		}
     	}
-    	else if(trenutni_cvor.getjedinkaIDN().equals("<izraz"))
+    	else if(trenutni_cvor.getjedinkaIDN().equals("<izraz>"))
     	{
-    		
+    		if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("<izraz_pridruzivanja>"))
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
+    			trenutni_cvor.setTip(trenutni_cvor.getdjeca().get(0).gettip());
+    			trenutni_cvor.setl_izraz(trenutni_cvor.getdjeca().get(0).getl_izraz());
+    		}
+    		else if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("<izraz>"))
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
+    			provjeri(trenutni_cvor.getdjeca().get(2),trenutni_cvor_u_tablici_znakova);
+    			trenutni_cvor.setTip(trenutni_cvor.getdjeca().get(2).gettip());
+    			trenutni_cvor.setl_izraz(false);
+    		}
+    		else
+    		{
+    			greska(trenutni_cvor);
+    		}
+    	}
+    	else if(trenutni_cvor.getjedinkaIDN().equals("<slozena_naredba>"))
+    	{
+    		if(trenutni_cvor.getdjeca().get(1).getjedinkaIDN().equals("<lista_naredbi>"))
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(1),trenutni_cvor_u_tablici_znakova);
+    		}
+    		else if(trenutni_cvor.getdjeca().get(1).getjedinkaIDN().equals("<lista_deklaracija>"))
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(1),trenutni_cvor_u_tablici_znakova);
+    			provjeri(trenutni_cvor.getdjeca().get(2),trenutni_cvor_u_tablici_znakova);
+    		}
+    		else
+    		{
+    			greska(trenutni_cvor);
+    		}
+    	}
+    	else if(trenutni_cvor.getjedinkaIDN().equals("<lista_naredbi>"))
+    	{
+    		if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("<naredba>"))
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
+    		}
+    		else if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("<lista_naredbi>"))
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
+    			provjeri(trenutni_cvor.getdjeca().get(1),trenutni_cvor_u_tablici_znakova);
+    		}
+    		else
+    		{
+    			greska(trenutni_cvor);
+    		}
+    	}
+    	else if(trenutni_cvor.getjedinkaIDN().equals("<naredba>"))
+    	{
+    		if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("<slozena_naredba>"))
+    		{
+    			CvorZn novi_cvor_znak=new CvorZn();
+    			novi_cvor_znak.setroditelj(trenutni_cvor_u_tablici_znakova);
+    			trenutni_cvor_u_tablici_znakova.dodajDjete(novi_cvor_znak);
+    			novi_cvor_znak.setuDjelokrugu(trenutni_cvor_u_tablici_znakova.getuDjelokrugu());
+    			provjeri(trenutni_cvor.getdjeca().get(0),novi_cvor_znak);
+    			trenutni_cvor_u_tablici_znakova=trenutni_cvor_u_tablici_znakova.getroditelj();
+    		}
+    		else if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("<izraz_naredba>") || trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("naredba_grananja>") || trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("<naredba_petlje>") || trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("<naredba_skoka>"))
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
+    		}
+    		else
+    		{
+    			greska(trenutni_cvor);
+    		}
+    	}
+    	else if(trenutni_cvor.getjedinkaIDN().equals("<izraz_naredba>"))
+    	{
+    		if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("TOCKAZAREZ"))
+    		{
+    			LinkedList<String> pom=new LinkedList<>();
+    			pom.add("int");
+    			trenutni_cvor.setTip(pom);
+    		}
+    		else if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("<izraz>"))
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
+    			trenutni_cvor.setTip(trenutni_cvor.getdjeca().get(0).gettip());
+    		}
+    		else
+    		{
+    			greska(trenutni_cvor);
+    		}
+    	}
+    	else if(trenutni_cvor.getjedinkaIDN().equals("<naredba_grananja>"))
+    	{
+    		if(trenutni_cvor.getdjeca().size()==5)
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(2),trenutni_cvor_u_tablici_znakova);
+    			LinkedList<String> pom = new LinkedList<>();
+    			pom.add("int");
+    			boolean t=provjeriTip(trenutni_cvor.getdjeca().get(2).gettip(),pom);
+    			if(!t)
+    			{
+    				greska(trenutni_cvor);
+    			}
+    			provjeri(trenutni_cvor.getdjeca().get(4),trenutni_cvor_u_tablici_znakova);
+    		}
+    		else if(trenutni_cvor.getdjeca().size()==7)
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(2),trenutni_cvor_u_tablici_znakova);
+    			LinkedList<String> pom = new LinkedList<>();
+    			pom.add("int");
+    			boolean t=provjeriTip(trenutni_cvor.getdjeca().get(2).gettip(),pom);
+    			if(!t)
+    			{
+    				greska(trenutni_cvor);
+    			}
+    			provjeri(trenutni_cvor.getdjeca().get(4),trenutni_cvor_u_tablici_znakova);
+    			provjeri(trenutni_cvor.getdjeca().get(6),trenutni_cvor_u_tablici_znakova);
+    			
+    		}
+    		else
+    		{
+    			greska(trenutni_cvor);
+    		}
+    	}
+    	else if(trenutni_cvor.getjedinkaIDN().equals("<naredba_petlje>"))
+    	{
+    		if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("KR_WHILE"))
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(2),trenutni_cvor_u_tablici_znakova);
+    			LinkedList<String> pom = new LinkedList<>();
+    			pom.add("int");
+    			boolean t=provjeriTip(trenutni_cvor.getdjeca().get(2).gettip(),pom);
+    			if(!t)
+    			{
+    				greska(trenutni_cvor);
+    			}
+    			u_petlji+=1;
+    			provjeri(trenutni_cvor.getdjeca().get(4),trenutni_cvor_u_tablici_znakova);
+    			u_petlji-=1;
+    			
+    		}
+    		else if(trenutni_cvor.getdjeca().get(4).getjedinkaIDN().equals("D_ZAGRADA"))
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(2),trenutni_cvor_u_tablici_znakova);
+    			provjeri(trenutni_cvor.getdjeca().get(3),trenutni_cvor_u_tablici_znakova);
+    			LinkedList<String> pom = new LinkedList<>();
+    			pom.add("int");
+    			boolean t=provjeriTip(trenutni_cvor.getdjeca().get(2).gettip(),pom);
+    			if(!t)
+    			{
+    				greska(trenutni_cvor);
+    			}
+    			u_petlji+=1;
+    			provjeri(trenutni_cvor.getdjeca().get(5),trenutni_cvor_u_tablici_znakova);
+    			u_petlji-=1;
+    		}
+    		else if(trenutni_cvor.getdjeca().get(4).getjedinkaIDN().equals("<izraz>"))
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(2),trenutni_cvor_u_tablici_znakova);
+    			provjeri(trenutni_cvor.getdjeca().get(3),trenutni_cvor_u_tablici_znakova);
+    			LinkedList<String> pom = new LinkedList<>();
+    			pom.add("int");
+    			boolean t=provjeriTip(trenutni_cvor.getdjeca().get(3).gettip(),pom);
+    			if(!t)
+    			{
+    				greska(trenutni_cvor);
+    			}
+    			provjeri(trenutni_cvor.getdjeca().get(4),trenutni_cvor_u_tablici_znakova);
+    			u_petlji+=1;
+    			provjeri(trenutni_cvor.getdjeca().get(6),trenutni_cvor_u_tablici_znakova);
+    			u_petlji-=1;
+    		}
+    		else
+    		{
+    			greska(trenutni_cvor);
+    		}
+    	}
+    	else if(trenutni_cvor.getjedinkaIDN().equals("<naredba_skoka>"))
+    	{
+    		if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("KR_CONTINUE") || trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("KR_BREAK"))
+    		{
+    			if(u_petlji<=0)
+    			{
+    				greska(trenutni_cvor);
+    			}
+    		}
+    		else if(trenutni_cvor.getdjeca().get(1).getjedinkaIDN().equals("TOCKAZAREZ"))
+    		{
+    			if(!trenutni_cvor_u_tablici_znakova.getuDjelokrugu().get(1).equals("void"))
+    			{
+    				greska(trenutni_cvor);
+    			}
+    		}
+    		else if(trenutni_cvor.getdjeca().get(1).getjedinkaIDN().equals("<izraz>"))
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(1),trenutni_cvor_u_tablici_znakova);
+    			if(trenutni_cvor_u_tablici_znakova.getuDjelokrugu().get(1).equals("void"))
+    			{
+    				greska(trenutni_cvor);
+    			}
+    			LinkedList<String> pom=new LinkedList<>();
+    			pom.add(trenutni_cvor_u_tablici_znakova.getuDjelokrugu().get(1));
+    			boolean t=provjeriTip(trenutni_cvor.getdjeca().get(1).gettip(),pom);
+    			if(!t)
+    			{
+    				greska(trenutni_cvor);
+    			}
+    			
+    		}
+    		else
+    		{
+    			greska(trenutni_cvor);
+    		}
+    	}
+    	else if(trenutni_cvor.getjedinkaIDN().equals("<prijevodna_jedinica>"))
+    	{
+    		if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("<vanjska_deklaracija>"))
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
+    		}
+    		else if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("<prijevodna_jedinica>"))
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
+    			provjeri(trenutni_cvor.getdjeca().get(1),trenutni_cvor_u_tablici_znakova);
+    		}
+    		else
+    		{
+    			greska(trenutni_cvor);
+    		}
+    	}
+    	else if(trenutni_cvor.getjedinkaIDN().equals("<vanjska_deklaracija>"))
+    	{
+    		if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("<definicija_funkcije>") || trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("<deklaracija>"))
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
+    		}
+    		else
+    		{
+    			greska(trenutni_cvor);
+    		}
     	}
     //kraj metode provjeri	
     }
