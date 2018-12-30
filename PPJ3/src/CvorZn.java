@@ -1,3 +1,5 @@
+
+
 import java.util.LinkedList;
 
 public class CvorZn {
@@ -7,10 +9,24 @@ public class CvorZn {
         LinkedList<CvorZn> djeca;
         LinkedList<String> uDjelokrugu;
 
-        void dodajDjete(CvorZn cvor){
+        public void dodajDjete(CvorZn cvor){
             this.djeca.add(cvor);
         }
         
+        public void setuDjelokrugu(LinkedList<String> uDj)
+        {
+        	this.uDjelokrugu=uDj;
+        }
+        
+        public LinkedList<String> getuDjelokrugu()
+        {
+        	return this.uDjelokrugu;
+        }
+        
+        public void setroditelj(CvorZn parent)
+        {
+        	this.roditelj=parent;
+        }
         
         public CvorZn getroditelj()
         {
