@@ -793,6 +793,496 @@ public class SemantickiAnalizator
     			greska(trenutni_cvor);
     		}
     	}
+    	else if(trenutni_cvor.getjedinkaIDN().equals("<definicija_funkcije>"))
+    	{
+    		if(trenutni_cvor.getdjeca().get(3).getjedinkaIDN().equals("KR_VOID"))
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
+    			if(trenutni_cvor.getdjeca().get(0).gettip().get(0).equals("const_int") || (trenutni_cvor.getdjeca().get(0).gettip().get(0).equals("const_char")))
+    			{
+    				greska(trenutni_cvor);
+    			}
+    			//tu sam se mozda zajebo
+    			identifikator IDN=provjeriTrenCvZnakova(trenutni_cvor.getdjeca().get(1),korijen_znakova);
+    			if(IDN!=null)
+    			{
+    				if(IDN.getDD()==1)
+    				{
+    					greska(trenutni_cvor);
+    				}
+    				if(IDN.getDD()==0)
+    				{
+    					if(!IDN.gettip().subList(2, IDN.gettip().size()).contains("void"))
+    					{
+    						greska(trenutni_cvor);
+    					}
+    					if(!IDN.gettip().get(1).equals(trenutni_cvor.getdjeca().get(0).gettip().get(0)))
+    					{
+    						greska(trenutni_cvor);
+    					}
+    					IDN.setDD(1);
+    				}
+    			}
+    			else
+    			{
+    				LinkedList<String> pom = new LinkedList<>();
+    				pom.add("fun");
+    				pom.add(trenutni_cvor.getdjeca().get(0).gettip().get(0));
+    				pom.add("void");
+    				identifikator IDN=new identifikator(pom,trenutni_cvor.getdjeca().get(1).getjedinkaime(),1,false);
+    				trenutni_cvor_u_tablici_znakova.dodajIdentifikator(IDN);
+    			}
+    			CvorZn novi_cvor_znak=new CvorZn();
+    			novi_cvor_znak.setroditelj(trenutni_cvor_u_tablici_znakova);
+    			trenutni_cvor_u_tablici_znakova.dodajDjete(novi_cvor_znak);
+    			LinkedList<String> pom = new LinkedList<>();
+				pom.add("fun");
+				pom.add(trenutni_cvor.getdjeca().get(0).gettip().get(0));
+				pom.add("void");
+				novi_cvor_znak.setuDjelokrugu(pom);
+				provjeri(trenutni_cvor.getdjeca().get(5),novi_cvor_znak);
+				trenutni_cvor_u_tablici_znakova=trenutni_cvor_u_tablici_znakova.getroditelj();
+    		}
+    		else if(trenutni_cvor.getdjeca().get(3).getjedinkaIDN().equals("<lista_parametara>"))
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
+    			if(trenutni_cvor.getdjeca().get(0).gettip().get(0).equals("const_int") || trenutni_cvor.getdjeca().get(0).gettip().get(0).equals("const_char"))
+    			{
+    				greska(trenutni_cvor);
+    			}
+    			identifikator IDN= provjeriTrenCvZnakova(trenutni_cvor.getdjeca().get(1).getjedinka(),korijen_znakova);
+    			if(IDN!=null)
+    			{
+    				if(IDN.getDD()==1)
+    				{
+    					greska(trenutni_cvor);
+    				}
+    			}
+    			provjeri(trenutni_cvor.getdjeca().get(3),trenutni_cvor_u_tablici_znakova);
+    			if(IDN!=null)
+    			{
+    				if(IDN.getDD()==0)
+    				{
+    					if(!IDN.gettip().get(1).equals(trenutni_cvor.getdjeca().get(0).gettip().get(0)))
+    					{
+    						greska(trenutni_cvor);
+    					}
+    					if(!IDN.gettip().subList(2, IDN.gettip().size()).equals(trenutni_cvor.getdjeca().get(3).gettip()))
+    					{
+    						greska(trenutni_cvor);
+    					}
+    					IDN.setDD(1);
+    					CvorZn novi_cvor_znak= new CvorZn();
+    					novi_cvor_znak.setuDjelokrugu(IDN.gettip());
+    				}
+    			}
+    			else
+    			{
+    				LinkedList<String> tip_funkcije=new LinkedList<>();
+    				tip_funkcije.add("fun");
+    				tip_funkcije.add(trenutni_cvor.getdjeca().get(0).gettip().get(0));
+    				tip_funkcije.addAll(trenutni_cvor.getdjeca().get(3).gettip());
+    				identifikator IDN = new identifikator(tip_funkcije, trenutni_cvor.getdjeca().get(1).getjedinkaime(),1,false);
+    				trenutni_cvor_u_tablici_znakova.dodajIdentifikator(IDN);
+    				CvorZn novi_cvor_znak=new CvorZn();
+    				novi_cvor_znak.setuDjelokrugu(tip_funkcije);
+    			}
+    			novi_cvor_znak.setroditelj(trenutni_cvor_u_tablici_znakova);
+    			trenutni_cvor_u_tablici_znakova.dodajDjete(novi_cvor_znak);
+    			LinkedList<String> pom=trenutni_cvor.getdjeca().get(3).gettip();
+    			LinkedList<LinkedList<String>> tipovi=new LinkedList<LinkedList<String>>();
+    			for(int i=0;i<pom.size();i++)
+    			{
+    				if(pom.get(i).equals("niz"))
+    				{
+    					LinkedList<String> x=new LinkedList<>();
+    					x.add(pom.get(i));
+    					x.add(pom.get(i+1));
+    					tipovi.add(x);
+    					i+=1;
+    				}
+    				else
+    				{
+    					LinkedList<String> x=new LinkedList<>();
+    					x.add(pom.get(i));
+    					tipovi.add(x);
+    				}
+    			}
+    			for(int i=0;i<tipovi.size();i++)
+    			{
+    				if(tipovi.get(i).size()>1)
+    				{
+    					//ovaj dio s .getjedinkaime i nesto ime[i] provjeri ak bu trebalo
+    					identifikator IDN=new identifikator(tipovi.get(i),trenutni_cvor.getdjeca().get(3).getIme().get(i),1,true);
+    				}
+    				else
+    				{
+    					identifikator IDN=new identifikator(tipovi.get(i),trenutni_cvor.getdjeca().get(3).getIme().get(i),1,true);
+    					novi_cvor_znak.dodajIdentifikator(IDN);
+    				}
+    			}
+    			provjeri(trenutni_cvor.getdjeca().get(5),novi_cvor_znak);
+    			trenutni_cvor_u_tablici_znakova=trenutni_cvor_u_tablici_znakova.getroditelj();
+    		}
+    		else
+    		{
+    			greska(trenutni_cvor);
+    		}
+    	}
+    	else if(trenutni_cvor.getjedinkaIDN().equals("<lista_parametara>"))
+    	{
+    		if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("<deklaracija_parametra>"))
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
+    			trenutni_cvor.setTip(trenutni_cvor.getdjeca().get(0).gettip());
+    			trenutni_cvor.setIme(trenutni_cvor.getdjeca().get(0).getIme());
+    		}
+    		else if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("<lista_parametara>"))
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
+    			provjeri(trenutni_cvor.getdjeca().get(2),trenutni_cvor_u_tablici_znakova);
+    			if(trenutni_cvor.getdjeca().get(0).getjedinkaime().equals(trenutni_cvor.getdjeca().get(2).getjedinkaime()))
+    			{
+    				greska(trenutni_cvor);
+    			}
+    			LinkedList<String> pom=trenutni_cvor.getdjeca().get(0).gettip();
+    			pom.addAll(trenutni_cvor.getdjeca().get(2).gettip());
+    			trenutni_cvor.setTip(pom);
+    			LinkedList<String> t=trenutni_cvor.getdjeca().get(0).getIme();
+    			t.addAll(trenutni_cvor.getdjeca().get(2).getIme());
+    			trenutni_cvor.setIme(t);
+    		}
+    		else
+    		{
+    			greska(trenutni_cvor);
+    		}
+    	}
+    	else if(trenutni_cvor.getjedinkaIDN().equals("<deklaracija_parametra>"))
+    	{
+    		if(trenutni_cvor.getdjeca().size()==2)
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
+    			if(trenutni_cvor.getdjeca().get(0).gettip().contains("void"))
+    			{
+    				greska(trenutni_cvor);
+    			}
+    			trenutni_cvor.setTip(trenutni_cvor.getdjeca().get(0).gettip());
+    			trenutni_cvor.setIme(trenutni_cvor.getdjeca().get(1).getjedinkaime());
+    		}
+    		else if(trenutni_cvor.getdjeca().size()==4)
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
+    			if(trenutni_cvor.getdjeca().get(0).gettip().contains("void"))
+    			{
+    				greska(trenutni_cvor);
+    			}
+    			LinkedList<String> pom =new LinkedList<>();
+    			pom.add("niz");
+    			pom.add(trenutni_cvor.getdjeca().get(0).gettip().get(0));
+    			trenutni_cvor.setTip(pom);
+    			LinkedList<String> p=new LinkedList<>();
+    			p.add(trenutni_cvor.getdjeca().get(1).getjedinkaime());
+    			trenutni_cvor.setIme(p);
+    		}
+    		else
+    		{
+    			greska(trenutni_cvor);
+    		}
+    	}
+    	else if(trenutni_cvor.getjedinkaIDN().equals("<lista_deklaracija>"))
+    	{
+    		if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("<deklaracija>"))
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
+    		}
+    		else if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("<lista_deklaracija>"))
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
+    			provjeri(trenutni_cvor.getdjeca().get(1),trenutni_cvor_u_tablici_znakova);
+    		}
+    		else
+    		{
+    			greska(trenutni_cvor);
+    		}
+    	}
+    	else if(trenutni_cvor.getjedinkaIDN().equals("<deklaracija>"))
+    	{
+    		if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("<ime_tipa>"))
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
+    			trenutni_cvor.getdjeca().get(1).setntip(trenutni_cvor.getdjeca().get(0).gettip());
+    			provjeri(trenutni_cvor.getdjeca().get(1),trenutni_cvor_u_tablici_znakova);
+    		}
+    		else
+    		{
+    			greska(trenutni_cvor);
+    		}
+    	}
+    	else if(trenutni_cvor.getjedinkaIDN().equals("<lista_init_deklaratora>"))
+    	{
+    		if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("<init_deklarator>"))
+    		{
+    			trenutni_cvor.getdjeca().get(0).setntip(trenutni_cvor.getntip());
+    			provjeri(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
+    		}
+    		else if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("<lista_init_deklaratora>"))
+    		{
+    			trenutni_cvor.getdjeca().get(0).setntip(trenutni_cvor.getntip());
+    			provjeri(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
+    			trenutni_cvor.getdjeca().get(2).setntip(trenutni_cvor.getntip());
+    			provjeri(trenutni_cvor.getdjeca().get(2),trenutni_cvor_u_tablici_znakova);
+    		}
+    		else
+    		{
+    			greska(trenutni_cvor);
+    		}
+    	}
+    	else if(trenutni_cvor.getjedinkaIDN().equals("<init_deklarator>"))
+    	{
+    		if(trenutni_cvor.getdjeca().size()==1)
+    		{
+    			trenutni_cvor.getdjeca().get(0).setntip(trenutni_cvor.getntip());
+    			provjeri(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
+    			if(trenutni_cvor.getdjeca().get(0).gettip().get(0).equals("const_int") || trenutni_cvor.getdjeca().get(0).gettip().get(0).equals("const_char"))
+    			{
+    				greska(trenutni_cvor);
+    			}
+    			if(trenutni_cvor.getdjeca().get(0).gettip().get(0).equals("niz") && (trenutni_cvor.getdjeca().get(0).gettip().get(1).equals("const_int") || trenutni_cvor.getdjeca().get(0).gettip().get(1).equals("const_char")))
+    			{
+    				greska(trenutni_cvor);
+    			}
+    		}
+    		else if(trenutni_cvor.getdjeca().size()==3)
+    		{
+    			trenutni_cvor.getdjeca().get(0).setntip(trenutni_cvor.gettip());
+    			provjeri(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
+    			provjeri(trenutni_cvor.getdjeca().get(2),trenutni_cvor_u_tablici_znakova);
+    			if(trenutni_cvor.getdjeca().get(0).gettip().get(0).equals("int") || trenutni_cvor.getdjeca().get(0).gettip().get(0).equals("const_int") || trenutni_cvor.getdjeca().get(0).gettip().get(0).equals("char") || trenutni_cvor.getdjeca().get(0).gettip().get(0).equals("const_char"))
+    			{
+    				boolean t=provjeriTip(trenutni_cvor.getdjeca().get(2).gettip(),trenutni_cvor.getdjeca().get(0).gettip());
+    				if(!t)
+    				{
+    					greska(trenutni_cvor);
+    				}
+    			}
+    			else if(trenutni_cvor.getdjeca().get(0).gettip().get(0).equals("niz"))
+    			{
+    				if(trenutni_cvor.getdjeca().get(0).gettip().get(1).equals("int") || trenutni_cvor.getdjeca().get(0).gettip().get(1).equals("const_int") || trenutni_cvor.getdjeca().get(0).gettip().get(1).equals("char") || trenutni_cvor.getdjeca().get(0).gettip().get(1).equals("const_char"))
+    				{
+    					if(trenutni_cvor.getdjeca().get(2).getbrElem()>trenutni_cvor.getdjeca().get(0).getbrElem())
+    					{
+    						greska(trenutni_cvor);
+    					}
+    					for(int i=0;i<trenutni_cvor.getdjeca().get(2).gettip().size()-1;i++)
+    					{
+    						LinkedList<String> pom = new LinkedList<>();
+    						pom.add(trenutni_cvor.getdjeca().get(2).gettip().get(i+1));
+    						LinkedList<String> pom2 = new LinkedList<>();
+    						pom2.add(trenutni_cvor.getdjeca().get(0).gettip().get(1));
+    						boolean t=provjeriTip(pom,pom2);
+    						if(!t)
+    						{
+    							greska(trenutni_cvor);
+    						}
+    					}
+    				}
+    				else
+    				{
+    					greska(trenutni_cvor);
+    				}
+    			}
+    			else
+    			{
+    				greska(trenutni_cvor);
+    			}
+    		}
+    		else
+    		{
+    			greska(trenutni_cvor);
+    		}
+    	}
+    	else if(trenutni_cvor.getjedinkaIDN().equals("<izravni_deklarator>"))
+    	{
+    		if(trenutni_cvor.getdjeca().size()==1)
+    		{
+    			if(trenutni_cvor.getdjeca().get(0).getntip().contains("void"))
+    			{
+    				greska(trenutni_cvor);
+    			}
+    			identifikator IDN=provjeriTrenCvZnakova(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
+    			if(IDN!=null)
+    			{
+    				greska(trenutni_cvor);
+    			}
+    			IDN=new identifikator(trenutni_cvor.getntip(),trenutni_cvor.getdjeca().get(0).getjedinkaime(),1,true);
+    			trenutni_cvor_u_tablici_znakova.dodajIdentifikator(IDN);
+    			trenutni_cvor.setTip(trenutni_cvor.getntip());
+    		}
+    		else if(trenutni_cvor.getdjeca().get(2).getjedinkaIDN().equals("BROJ"))
+    		{
+    			if(trenutni_cvor.getntip().contains("void"))
+    			{
+    				greska(trenutni_cvor);
+    			}
+    			identifikator IDN=provjeriTrenCvZnakova(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
+    			if(IDN!=null)
+    			{
+    				greska(trenutni_cvor);
+    			}
+    			if(Integer.parseInt(trenutni_cvor.getdjeca().get(2).getjedinkaime())<0 || Integer.parseInt(trenutni_cvor.getdjeca().get(2).getjedinkaime())>1024)
+    			{
+    				greska(trenutni_cvor);
+    			}
+    			LinkedList<String>p = new LinkedList<>();
+    			p.add("niz");
+    			p.add(trenutni_cvor.getntip().get(0));
+    			identifikator IDN= new identifikator(p,trenutni_cvor.getdjeca().get(0).getjedinkaime(),1,true);
+    			trenutni_cvor_u_tablici_znakova.dodajIdentifikator(IDN);
+    			trenutni_cvor.setTip(p);
+    			trenutni_cvor.setbrElem(Integer.parseInt(trenutni_cvor.getdjeca().get(2).getjedinkaime()));
+    		}
+    		else if(trenutni_cvor.getdjeca().get(2).getjedinkaIDN().equals("KR_VOID"))
+    		{
+    			identifikator IDN=provjeriTrenCvZnakova(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
+    			if(IDN!=null)
+    			{
+    				//mozda fail
+    				if(!IDN.gettip().get(1).equals(trenutni_cvor.getntip().get(0)))
+    				{
+    					greska(trenutni_cvor);
+    				}
+    				if(!IDN.gettip().subList(2, IDN.gettip().size()).contains("void"))
+    				{
+    					greska(trenutni_cvor);
+    				}
+    			}
+    			else
+    			{
+    				LinkedList<String> pom=new LinkedList<>();
+    				pom.add("fun");
+    				pom.add(trenutni_cvor.getntip().get(0));
+    				pom.add("void");
+    				identifikator IDN=new identifikator(pom,trenutni_cvor.getdjeca().get(0).getjedinkaime(),0,false);
+    				trenutni_cvor_u_tablici_znakova.dodajIdentifikator(IDN);
+    			}
+    			LinkedList<String> pom=new LinkedList<>();
+				pom.add("fun");
+				pom.add(trenutni_cvor.getntip().get(0));
+				pom.add("void");
+				trenutni_cvor.setTip(pom);
+    		}
+    		else if(trenutni_cvor.getdjeca().get(2).getjedinkaIDN().equals("lista_parametara>"))
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(2),trenutni_cvor_u_tablici_znakova);
+    			identifikator IDN=provjeriTrenCvZnakova(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
+    			if(IDN!=null)
+    			{
+    				if(IDN.gettip().get(1)!=trenutni_cvor.getntip().get(0))
+    				{
+    					greska(trenutni_cvor);
+    				}
+    				if(!IDN.gettip().subList(2, IDN.gettip().size()).equals(trenutni_cvor.getdjeca().get(2).gettip()))
+    				{
+    					greska(trenutni_cvor);
+    				}
+    			}
+    			else
+    			{
+    				LinkedList<String> pom =new LinkedList<>();
+    				pom.add("fun");
+    				pom.add(trenutni_cvor.getntip().get(0));
+    				pom.addAll(trenutni_cvor.getdjeca().get(2).gettip());
+    				identifikator IDN=new identifikator(pom, trenutni_cvor.getdjeca().get(0).getjedinkaime(),0,false);
+    				trenutni_cvor_u_tablici_znakova.dodajIdentifikator(IDN);
+    			}
+    			LinkedList<String> pom =new LinkedList<>();
+				pom.add("fun");
+				pom.add(trenutni_cvor.getntip().get(0));
+				pom.addAll(trenutni_cvor.getdjeca().get(2).gettip());
+				trenutni_cvor.setTip(pom);
+    		}
+    		else
+    		{
+    			greska(trenutni_cvor);
+    		}
+    	}
+    	else if(trenutni_cvor.getjedinkaIDN().equals("<inicijalizator>"))
+    	{
+    		if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("<izraz_pridruzivanja>"))
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
+    			Cvor cvor_NIZ_ZNAKOVA=null;
+    			LinkedList<Cvor> treba_provjeriti=trenutni_cvor.getdjeca();
+    			
+    			while(treba_provjeriti.size()>0)
+    			{
+    				if(treba_provjeriti.get(0).getjedinkaIDN().equals("NIZ_ZNAKOVA"))
+    				{
+    					cvor_NIZ_ZNAKOVA=treba_provjeriti.get(0);
+    					break;
+    				}
+    				else
+    				{
+    					if(treba_provjeriti.get(0).getdjeca().size()>0)
+    					{
+    						treba_provjeriti.addAll(treba_provjeriti.get(0).getdjeca());
+    					}
+    				}
+    				treba_provjeriti.remove(0);
+    			}
+    			if(cvor_NIZ_ZNAKOVA!=null)
+    			{
+    				trenutni_cvor.setbrElem(cvor_NIZ_ZNAKOVA.getjedinkaime().length()-2+1);
+    				LinkedList<String> pom = new LinkedList<>();
+    				for(int i=0;i<trenutni_cvor.getbrElem();i++)
+    				{
+    					pom.add("char");
+    				}
+    				trenutni_cvor.setTip(pom);
+    			}
+    			else
+    			{
+    				trenutni_cvor.setTip(trenutni_cvor.getdjeca().get(0).gettip());
+    			}
+    		}
+    		else if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("L_VIT_ZAGRADA"))
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(1),trenutni_cvor_u_tablici_znakova);
+    			trenutni_cvor.setbrElem(trenutni_cvor.getdjeca().get(1).getbrElem());
+    			trenutni_cvor.setTip(trenutni_cvor.getdjeca().get(1).gettip());
+    		}
+    		else
+    		{
+    			greska(trenutni_cvor);
+    		}
+    	}
+    	else if(trenutni_cvor.getjedinkaIDN().equals("<lista_izraza_pridruzivanja>"))
+    	{
+    		if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("<izraz_pridruzivanja>"))
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
+    			trenutni_cvor.setTip(trenutni_cvor.getdjeca().get(0).gettip());
+    			trenutni_cvor.setbrElem(1);
+    		}
+    		else if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("<lista_izraza_pridruzivanja>"))
+    		{
+    			provjeri(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
+    			provjeri(trenutni_cvor.getdjeca().get(2),trenutni_cvor_u_tablici_znakova);
+    			LinkedList<String> pom =new LinkedList<>();
+    			pom.addAll(trenutni_cvor.getdjeca().get(0).gettip());
+    			pom.addAll(trenutni_cvor.getdjeca().get(2).gettip());
+    			trenutni_cvor.setTip(pom);
+    			trenutni_cvor.setbrElem(trenutni_cvor.getdjeca().get(0).getbrElem()+1);
+    		}
+    		else
+    		{
+    			greska(trenutni_cvor);
+    		}
+    	}
+    	else
+    	{
+    		greska(trenutni_cvor);
+    	}
     //kraj metode provjeri	
     }
 //kraj seman
