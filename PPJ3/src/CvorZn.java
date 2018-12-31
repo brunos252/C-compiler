@@ -1,5 +1,3 @@
-
-
 import java.util.LinkedList;
 
 public class CvorZn {
@@ -72,6 +70,20 @@ public class CvorZn {
         public int getDD()
         {
         	return this.DD;
+        }
+        
+        public void setDD(int DD)
+        {
+        	this.DD=DD;
+        }
+        
+        public identifikator(LinkedList<String> tip, String ime, int DD, boolean l_izraz)
+        {
+        	this.tip=tip;
+        	this.ime=ime;
+        	this.DD=DD;
+        	this.l_izraz=l_izraz;
+        	this.vrijednost=null;
         }
         
         public identifikator(){
