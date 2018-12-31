@@ -1,14 +1,49 @@
-import java.util.LinkedList;
 
+import java.util.LinkedList;
 
 public class Cvor {
 
-    String ime;
+    LinkedList<String> ime;
     int brElem;
     boolean l_izraz;
     lexJed jedinka;
     LinkedList<Cvor> djeca;
     LinkedList<String> tip, ntip;
+    
+    public void setbrElem(int brElem)
+    {
+    	this.brElem=brElem;
+    }
+    
+    public int getbrElem()
+    {
+    	return this.brElem;
+    }
+    
+    public LinkedList<String> getntip()
+    {
+    	return this.ntip;
+    }
+    
+    public void setntip(LinkedList<String> pom)
+    {
+    	this.ntip=pom;
+    }
+    
+    public LinkedList<String> getIme()
+    {
+    	return this.ime;
+    }
+    
+    public void setIme(LinkedList<String> ime)
+    {
+    	this.ime=ime;
+    }
+    
+    public lexJed getjedinka()
+    {
+    	return this.jedinka;
+    }
     
 	public void setTip(LinkedList<String> tip) {
 		this.tip = tip;
@@ -85,3 +120,5 @@ public class Cvor {
             return this.IDN + " " + this.raz + " " + this.ime;
         }
     }
+}
+
