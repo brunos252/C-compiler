@@ -1,3 +1,4 @@
+package hehe;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.InputStreamReader;
@@ -5,10 +6,10 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
-import Cvor;
-import CvorZn;
-import CvorZn.identifikator;
-import Cvor.lexJed;
+import hehe.Cvor;
+import hehe.CvorZn;
+import hehe.CvorZn.identifikator;
+import hehe.Cvor.lexJed;
 
 public class SemantickiAnalizator 
 {
@@ -16,6 +17,8 @@ public class SemantickiAnalizator
 	public static int razina=0;
 	public static Cvor korijen=new Cvor();
 	public static LinkedHashMap<Integer, Cvor> dict_razina=new LinkedHashMap<Integer, Cvor>();
+	public static CvorZn korijen_znakova=new CvorZn();
+	public static CvorZn novi_cvor_znak=new CvorZn();
 
     public static void main(String[] args) 
     {
@@ -23,7 +26,6 @@ public class SemantickiAnalizator
     	try(BufferedReader br = new BufferedReader(new FileReader("C:\\OOP\\hehe\\inp.txt")))
     	{
     		line=br.readLine();
-    		System.out.println(line);
     		String pr=line.stripTrailing();
     		korijen.setjedinka(new Cvor.lexJed(pr,null,0));
     		dict_razina.put(0, korijen);
@@ -39,7 +41,6 @@ public class SemantickiAnalizator
     			}
     			else
     			{
-    				System.out.println(pr);
     				String[] x=pr.split(" ");
     				String dva="(' ')";
     				dva.concat(x[2]);
@@ -57,13 +58,12 @@ public class SemantickiAnalizator
     	{
     		e.printStackTrace();
     	}
-    	CvorZn korijen_znakova=new CvorZn();
     	provjeri(korijen, korijen_znakova);
     	imaMain(korijen_znakova);
     	provjeriFun(korijen_znakova);
     }
 
-    private boolean provjeriTip(LinkedList<String> tip1, LinkedList<String> tip2)
+    private static boolean provjeriTip(LinkedList<String> tip1, LinkedList<String> tip2)
     {
     	if(tip1.get(0).equals(tip2.get(0)))
     	{
@@ -100,7 +100,7 @@ public class SemantickiAnalizator
         return false;
     }
 
-    private void greska(Cvor cvor)
+    private static void greska(Cvor cvor)
     {
     	System.out.println(cvor.getjedinkaIDN()+"::=");
     	for (Cvor baby : cvor.getdjeca())
@@ -117,7 +117,7 @@ public class SemantickiAnalizator
         System.exit(0);
     }
 
-    private identifikator pretraziTabZnakova(Cvor jedinka, CvorZn trenutni_cvor_znak)
+    private static  identifikator pretraziTabZnakova(Cvor jedinka, CvorZn trenutni_cvor_znak)
     {
         for(identifikator IDN: trenutni_cvor_znak.getidentifikatori())
         {
@@ -136,7 +136,7 @@ public class SemantickiAnalizator
        return pretraziTabZnakova(jedinka, trenutni_cvor_znak.getroditelj());
     }
 
-    private identifikator provjeriTrenCvZnakova(Cvor jedinka, CvorZn trenutni_cvor_znak)
+    private static identifikator provjeriTrenCvZnakova(Cvor jedinka, CvorZn trenutni_cvor_znak)
     {
     	for(identifikator IDN: trenutni_cvor_znak.getidentifikatori())
         {
@@ -659,7 +659,6 @@ public class SemantickiAnalizator
     	{
     		if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("<slozena_naredba>"))
     		{
-    			CvorZn novi_cvor_znak=new CvorZn();
     			novi_cvor_znak.setroditelj(trenutni_cvor_u_tablici_znakova);
     			trenutni_cvor_u_tablici_znakova.dodajDjete(novi_cvor_znak);
     			novi_cvor_znak.setuDjelokrugu(trenutni_cvor_u_tablici_znakova.getuDjelokrugu());
@@ -879,7 +878,7 @@ public class SemantickiAnalizator
     				pom.add("fun");
     				pom.add(trenutni_cvor.getdjeca().get(0).gettip().get(0));
     				pom.add("void");
-    				identifikator IDN=new identifikator(pom,trenutni_cvor.getdjeca().get(1).getjedinkaime(),1,false);
+    				IDN=new identifikator(pom,trenutni_cvor.getdjeca().get(1).getjedinkaime(),1,false);
     				trenutni_cvor_u_tablici_znakova.dodajIdentifikator(IDN);
     			}
     			CvorZn novi_cvor_znak=new CvorZn();
@@ -900,7 +899,7 @@ public class SemantickiAnalizator
     			{
     				greska(trenutni_cvor);
     			}
-    			identifikator IDN= provjeriTrenCvZnakova(trenutni_cvor.getdjeca().get(1).getjedinka(),korijen_znakova);
+    			identifikator IDN= provjeriTrenCvZnakova(trenutni_cvor.getdjeca().get(1),korijen_znakova);
     			if(IDN!=null)
     			{
     				if(IDN.getDD()==1)
@@ -932,7 +931,7 @@ public class SemantickiAnalizator
     				tip_funkcije.add("fun");
     				tip_funkcije.add(trenutni_cvor.getdjeca().get(0).gettip().get(0));
     				tip_funkcije.addAll(trenutni_cvor.getdjeca().get(3).gettip());
-    				identifikator IDN = new identifikator(tip_funkcije, trenutni_cvor.getdjeca().get(1).getjedinkaime(),1,false);
+    				IDN = new identifikator(tip_funkcije, trenutni_cvor.getdjeca().get(1).getjedinkaime(),1,false);
     				trenutni_cvor_u_tablici_znakova.dodajIdentifikator(IDN);
     				CvorZn novi_cvor_znak=new CvorZn();
     				novi_cvor_znak.setuDjelokrugu(tip_funkcije);
@@ -963,11 +962,11 @@ public class SemantickiAnalizator
     				if(tipovi.get(i).size()>1)
     				{
     					//ovaj dio s .getjedinkaime i nesto ime[i] provjeri ak bu trebalo
-    					identifikator IDN=new identifikator(tipovi.get(i),trenutni_cvor.getdjeca().get(3).getIme().get(i),1,true);
+    					IDN=new identifikator(tipovi.get(i),trenutni_cvor.getdjeca().get(3).getIme().get(i),1,true);
     				}
     				else
     				{
-    					identifikator IDN=new identifikator(tipovi.get(i),trenutni_cvor.getdjeca().get(3).getIme().get(i),1,true);
+    					IDN=new identifikator(tipovi.get(i),trenutni_cvor.getdjeca().get(3).getIme().get(i),1,true);
     					novi_cvor_znak.dodajIdentifikator(IDN);
     				}
     			}
@@ -1017,7 +1016,10 @@ public class SemantickiAnalizator
     				greska(trenutni_cvor);
     			}
     			trenutni_cvor.setTip(trenutni_cvor.getdjeca().get(0).gettip());
-    			trenutni_cvor.setIme(trenutni_cvor.getdjeca().get(1).getjedinkaime());
+    			//ehmmm
+    			LinkedList<String> pom =new LinkedList<>();
+    			pom.add(trenutni_cvor.getdjeca().get(1).getjedinkaime());
+    			trenutni_cvor.setIme(pom);
     		}
     		else if(trenutni_cvor.getdjeca().size()==4)
     		{
@@ -1186,7 +1188,7 @@ public class SemantickiAnalizator
     			LinkedList<String>p = new LinkedList<>();
     			p.add("niz");
     			p.add(trenutni_cvor.getntip().get(0));
-    			identifikator IDN= new identifikator(p,trenutni_cvor.getdjeca().get(0).getjedinkaime(),1,true);
+    			IDN= new identifikator(p,trenutni_cvor.getdjeca().get(0).getjedinkaime(),1,true);
     			trenutni_cvor_u_tablici_znakova.dodajIdentifikator(IDN);
     			trenutni_cvor.setTip(p);
     			trenutni_cvor.setbrElem(Integer.parseInt(trenutni_cvor.getdjeca().get(2).getjedinkaime()));
@@ -1212,7 +1214,7 @@ public class SemantickiAnalizator
     				pom.add("fun");
     				pom.add(trenutni_cvor.getntip().get(0));
     				pom.add("void");
-    				identifikator IDN=new identifikator(pom,trenutni_cvor.getdjeca().get(0).getjedinkaime(),0,false);
+    				IDN=new identifikator(pom,trenutni_cvor.getdjeca().get(0).getjedinkaime(),0,false);
     				trenutni_cvor_u_tablici_znakova.dodajIdentifikator(IDN);
     			}
     			LinkedList<String> pom=new LinkedList<>();
@@ -1242,7 +1244,7 @@ public class SemantickiAnalizator
     				pom.add("fun");
     				pom.add(trenutni_cvor.getntip().get(0));
     				pom.addAll(trenutni_cvor.getdjeca().get(2).gettip());
-    				identifikator IDN=new identifikator(pom, trenutni_cvor.getdjeca().get(0).getjedinkaime(),0,false);
+    				IDN=new identifikator(pom, trenutni_cvor.getdjeca().get(0).getjedinkaime(),0,false);
     				trenutni_cvor_u_tablici_znakova.dodajIdentifikator(IDN);
     			}
     			LinkedList<String> pom =new LinkedList<>();
