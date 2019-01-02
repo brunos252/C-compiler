@@ -1,16 +1,66 @@
-
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
 import Cvor;
 import CvorZn;
 import CvorZn.identifikator;
+import Cvor.lexJed;
 
 public class SemantickiAnalizator 
 {
 	public static int u_petlji=0;
+	public static int razina=0;
+	public static Cvor korijen=new Cvor();
+	public static LinkedHashMap<Integer, Cvor> dict_razina=new LinkedHashMap<Integer, Cvor>();
 
-    public static void main(String[] args) {
-	// write your code here
+    public static void main(String[] args) 
+    {
+    	String line=null;
+    	try(BufferedReader br = new BufferedReader(new FileReader("C:\\OOP\\hehe\\inp.txt")))
+    	{
+    		line=br.readLine();
+    		System.out.println(line);
+    		String pr=line.stripTrailing();
+    		korijen.setjedinka(new Cvor.lexJed(pr,null,0));
+    		dict_razina.put(0, korijen);
+    		line=br.readLine();
+    		while(line!=null && !(line.isEmpty()))
+    		{
+    			int broj_razmaka=line.length()-line.strip().length();
+    			pr=line.strip();
+    			lexJed pom;
+    			if(pr.startsWith("<"))
+    			{
+    				pom=new Cvor.lexJed(pr, null, 0);
+    			}
+    			else
+    			{
+    				System.out.println(pr);
+    				String[] x=pr.split(" ");
+    				String dva="(' ')";
+    				dva.concat(x[2]);
+    				pom=new Cvor.lexJed(x[0], dva, Integer.parseInt(x[1]));
+    			}
+    			Cvor cv=new Cvor();
+    			cv.setjedinka(pom);
+    			dict_razina.put(broj_razmaka, cv);
+    			Cvor pomoc=dict_razina.get(broj_razmaka-1);
+    			pomoc.dodajDjete(cv);
+        		line=br.readLine();
+    		}
+    	}
+    	catch(Exception e)
+    	{
+    		e.printStackTrace();
+    	}
+    	CvorZn korijen_znakova=new CvorZn();
+    	provjeri(korijen, korijen_znakova);
+    	imaMain(korijen_znakova);
+    	provjeriFun(korijen_znakova);
     }
 
     private boolean provjeriTip(LinkedList<String> tip1, LinkedList<String> tip2)
@@ -98,7 +148,7 @@ public class SemantickiAnalizator
     	return null;
     }
 
-    private boolean imaMain(CvorZn korijen_znakova)
+    private static boolean imaMain(CvorZn korijen_znakova)
     {
     	boolean ima=false;
     	
@@ -124,7 +174,7 @@ public class SemantickiAnalizator
         return true;
     }
 
-    private boolean provjeriFun(CvorZn korijen_znakova)
+    private static boolean provjeriFun(CvorZn korijen_znakova)
     {
     	for(identifikator IDN:korijen_znakova.getidentifikatori())
     	{
@@ -144,7 +194,7 @@ public class SemantickiAnalizator
     	return true;
     }
 
-    private void provjeri(Cvor trenutni_cvor, CvorZn trenutni_cvor_u_tablici_znakova)
+    private static void provjeri(Cvor trenutni_cvor, CvorZn trenutni_cvor_u_tablici_znakova)
     {
     	if(trenutni_cvor.getjedinkaIDN().equals("<primarni_izraz>"))
     	{
