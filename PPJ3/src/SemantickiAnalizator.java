@@ -2,6 +2,7 @@ package hehe;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.InputStreamReader;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -42,8 +43,7 @@ public class SemantickiAnalizator
     			else
     			{
     				String[] x=pr.split(" ");
-    				String dva="(' ')";
-    				dva.concat(x[2]);
+    				String dva=x[2];
     				pom=new Cvor.lexJed(x[0], dva, Integer.parseInt(x[1]));
     			}
     			Cvor cv=new Cvor();
@@ -102,18 +102,19 @@ public class SemantickiAnalizator
 
     private static void greska(Cvor cvor)
     {
-    	System.out.println(cvor.getjedinkaIDN()+"::=");
+    	System.out.print(cvor.getjedinkaIDN()+" ::= ");
     	for (Cvor baby : cvor.getdjeca())
     	{
     		if(baby.getjedinkaIDN().equals("<"))
     		{
-    			System.out.println(baby.getjedinkaIDN());
+    			System.out.print(baby.getjedinkaIDN());
     		}
     		else
     		{
-    			System.out.println(baby.getjedinkaIDN()+"("+Integer.toString(baby.getjedinkaraz())+","+baby.getjedinkaime()+")");
+    			System.out.print(baby.getjedinkaIDN()+"("+Integer.toString(baby.getjedinkaraz())+","+baby.getjedinkaime()+")");
     		}
     	}  	
+    	System.out.println("");
         System.exit(0);
     }
 
@@ -210,7 +211,14 @@ public class SemantickiAnalizator
     		}
     		else if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("BROJ"))
         	{
-        		if (Integer.parseInt(trenutni_cvor.getdjeca().get(0).getjedinkaime()) < Math.pow(-2, 31) || Integer.parseInt(trenutni_cvor.getdjeca().get(0).getjedinkaime()) > Math.pow(2, 31)-1)
+    			BigInteger big=new BigInteger((trenutni_cvor.getdjeca().get(0).getjedinkaime()));
+    			//String mali=String.valueOf(Math.pow(-2, 31));
+    			//String veli=String.valueOf(Math.pow(2, 31)-1);
+    			String mali=String.valueOf(2147483647);
+    			String veli=String.valueOf(2147483647);
+    			BigInteger min=new BigInteger(mali);
+    			BigInteger max=new BigInteger(veli);
+        		if (big.compareTo(max)==1 || big.compareTo(min.negate())==-1)
         		{
         			greska(trenutni_cvor);
         		}
@@ -878,7 +886,7 @@ public class SemantickiAnalizator
     				pom.add("fun");
     				pom.add(trenutni_cvor.getdjeca().get(0).gettip().get(0));
     				pom.add("void");
-    				IDN=new identifikator(pom,trenutni_cvor.getdjeca().get(1).getjedinkaime(),1,false);
+    				IDN=new CvorZn.identifikator(pom, trenutni_cvor.getdjeca().get(1).getjedinkaime(), 1, false);
     				trenutni_cvor_u_tablici_znakova.dodajIdentifikator(IDN);
     			}
     			CvorZn novi_cvor_znak=new CvorZn();
@@ -1339,3 +1347,4 @@ public class SemantickiAnalizator
     }
 //kraj seman
 }
+
