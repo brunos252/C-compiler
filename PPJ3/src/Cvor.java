@@ -1,3 +1,4 @@
+package hehe;
 
 import java.util.LinkedList;
 
@@ -8,8 +9,8 @@ public class Cvor
     int brElem;
     boolean l_izraz;
     lexJed jedinka;
-    LinkedList<Cvor> djeca;
-    LinkedList<String> tip, ntip;
+    LinkedList<Cvor> djeca = new LinkedList<>();
+    LinkedList<String> tip, ntip=new LinkedList<>();
     
     public Cvor()
     {
@@ -132,3 +133,4 @@ public class Cvor
         }
     }
 }
+
