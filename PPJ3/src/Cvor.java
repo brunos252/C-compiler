@@ -1,7 +1,8 @@
 
 import java.util.LinkedList;
 
-public class Cvor {
+public class Cvor
+{
 
     LinkedList<String> ime;
     int brElem;
@@ -9,6 +10,16 @@ public class Cvor {
     lexJed jedinka;
     LinkedList<Cvor> djeca;
     LinkedList<String> tip, ntip;
+    
+    public Cvor()
+    {
+    	
+    }
+    
+    public void setjedinka(Cvor.lexJed jedinka)
+    {
+    	this.jedinka=jedinka;
+    }
     
     public void setbrElem(int brElem)
     {
@@ -102,7 +113,7 @@ public class Cvor {
         //TODO
     }
 
-    public class lexJed
+    public static class lexJed
     {
         String IDN, ime;
         int raz;
@@ -121,4 +132,3 @@ public class Cvor {
         }
     }
 }
-
