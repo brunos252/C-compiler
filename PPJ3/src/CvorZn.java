@@ -1,100 +1,135 @@
 
 import java.util.LinkedList;
 
-public class CvorZn 
+public class Cvor
 {
 
-        CvorZn roditelj;
-        LinkedList<identifikator> identifikatori;
-        LinkedList<CvorZn> djeca;
-        LinkedList<String> uDjelokrugu;
-
-        public void dodajDjete(CvorZn cvor){
-            this.djeca.add(cvor);
-        }
-        
-        public void setuDjelokrugu(LinkedList<String> uDj)
-        {
-        	this.uDjelokrugu=uDj;
-        }
-        
-        public LinkedList<String> getuDjelokrugu()
-        {
-        	return this.uDjelokrugu;
-        }
-        
-        public void setroditelj(CvorZn parent)
-        {
-        	this.roditelj=parent;
-        }
-        
-        public CvorZn getroditelj()
-        {
-        	return this.roditelj;
-        }
-        
-        public LinkedList<CvorZn> getdjeca()
-        {
-        	return this.djeca;
-        }
-        
-        public LinkedList<identifikator> getidentifikatori()
-        {
-        	return this.identifikatori;
-        }
-        
-        void dodajIdentifikator(identifikator idn){
-            this.identifikatori.add(idn);
-        }
-
-    public class identifikator
+    LinkedList<String> ime;
+    int brElem;
+    boolean l_izraz;
+    lexJed jedinka;
+    LinkedList<Cvor> djeca;
+    LinkedList<String> tip, ntip;
+    
+    public Cvor()
     {
-        LinkedList<String> tip;
-        String ime;
-        int DD; //-1: none, 0: deklarirano, 1: definirano
-        boolean l_izraz;
-        String vrijednost;
-        
-        public boolean getl_izraz()
-        {
-        	return this.l_izraz;
+    	
+    }
+    
+    public void setjedinka(Cvor.lexJed jedinka)
+    {
+    	this.jedinka=jedinka;
+    }
+    
+    public void setbrElem(int brElem)
+    {
+    	this.brElem=brElem;
+    }
+    
+    public int getbrElem()
+    {
+    	return this.brElem;
+    }
+    
+    public LinkedList<String> getntip()
+    {
+    	return this.ntip;
+    }
+    
+    public void setntip(LinkedList<String> pom)
+    {
+    	this.ntip=pom;
+    }
+    
+    public LinkedList<String> getIme()
+    {
+    	return this.ime;
+    }
+    
+    public void setIme(LinkedList<String> ime)
+    {
+    	this.ime=ime;
+    }
+    
+    public lexJed getjedinka()
+    {
+    	return this.jedinka;
+    }
+    
+	public void setTip(LinkedList<String> tip) {
+		this.tip = tip;
+	}
+	
+	public LinkedList<String> gettip()
+	{
+		return this.tip;
+	}
+	
+	public void setl_izraz(boolean izraz)
+	{
+		this.l_izraz=izraz;
+	}
+	
+	public boolean getl_izraz()
+	{
+		return this.l_izraz;
+	}
+	
+	public LinkedList<Cvor> getdjeca()
+    {
+    	return this.djeca;
+    }
+    
+    public String getjedinkaIDN()
+    {
+    	return this.jedinka.IDN;
+    }
+    
+    public void dodajDjete(Cvor djete)
+    {
+        djeca.add(djete);
+    }
+    
+    public int getjedinkaraz()
+    {
+    	return this.jedinka.raz;
+    }
+    
+    public String getjedinkaime()
+    {
+    	return this.jedinka.ime;
+    }
+
+    @Override
+    public String toString() {
+        if((this.jedinka.IDN.startsWith("<")) || (this.jedinka.IDN.equals("$"))){
+            return this.jedinka.IDN;
+        }else{
+            return this.jedinka.IDN + " " + this.jedinka.ime + " " + this.jedinka.raz;
         }
-        
-        public String getime()
+    }
+
+    void printStablo(){
+        //TODO
+    }
+
+    public static class lexJed
+    {
+        String IDN, ime;
+        int raz;
+
+        public lexJed(String IDN, String ime, int raz)
         {
-        	return this.ime;
-        }
-        
-        public LinkedList<String> gettip()
-        {
-        	return this.tip;
-        }
-        
-        public int getDD()
-        {
-        	return this.DD;
-        }
-        
-        public void setDD(int DD)
-        {
-        	this.DD=DD;
-        }
-        
-        public identifikator(LinkedList<String> tip, String ime, int DD, boolean l_izraz)
-        {
-        	this.tip=tip;
-        	this.ime=ime;
-        	this.DD=DD;
-        	this.l_izraz=l_izraz;
-        	this.vrijednost=null;
-        }
-        
-        public identifikator(){
-            this.DD = -1;
-            this.tip = new LinkedList<>();
+            this.IDN = IDN;
             this.ime = ime;
-            this.vrijednost = vrijednost;
-            this.l_izraz = false;
+            this.raz = raz;
+        }
+        
+
+        @Override
+        public String toString() {
+            return this.IDN + " " + this.raz + " " + this.ime;
         }
     }
 }
+
