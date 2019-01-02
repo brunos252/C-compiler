@@ -1,6 +1,8 @@
+
 import java.util.LinkedList;
 
-public class CvorZn {
+public class CvorZn 
+{
 
         CvorZn roditelj;
         LinkedList<identifikator> identifikatori;
@@ -45,7 +47,8 @@ public class CvorZn {
             this.identifikatori.add(idn);
         }
 
-    public class identifikator{
+    public class identifikator
+    {
         LinkedList<String> tip;
         String ime;
         int DD; //-1: none, 0: deklarirano, 1: definirano
