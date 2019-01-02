@@ -1,3 +1,4 @@
+package hehe;
 
 import java.util.LinkedList;
 
@@ -5,9 +6,9 @@ public class CvorZn
 {
 
         CvorZn roditelj;
-        LinkedList<identifikator> identifikatori;
-        LinkedList<CvorZn> djeca;
-        LinkedList<String> uDjelokrugu;
+        LinkedList<identifikator> identifikatori=new LinkedList<>();
+        LinkedList<CvorZn> djeca=new LinkedList<>();
+        LinkedList<String> uDjelokrugu=new LinkedList<>();
 
         public void dodajDjete(CvorZn cvor){
             this.djeca.add(cvor);
