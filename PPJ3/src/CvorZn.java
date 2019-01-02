@@ -48,7 +48,7 @@ public class CvorZn
             this.identifikatori.add(idn);
         }
 
-    public class identifikator
+    public static class identifikator
     {
         LinkedList<String> tip;
         String ime;
