@@ -24,17 +24,17 @@ public class SemantickiAnalizator
     public static void main(String[] args) 
     {
     	String line=null;
-    	try(BufferedReader br = new BufferedReader(new FileReader("C:\\OOP\\hehe\\inp.txt")))
+    	try(BufferedReader br = new BufferedReader(new FileReader("C:\\OOP\\hehe\\05_impl_int2char\\test.in")))
     	{
     		line=br.readLine();
-    		String pr=line.stripTrailing();
+    		String pr=line.trim();
     		korijen.setjedinka(new Cvor.lexJed(pr,null,0));
     		dict_razina.put(0, korijen);
     		line=br.readLine();
     		while(line!=null && !(line.isEmpty()))
     		{
-    			int broj_razmaka=line.length()-line.strip().length();
-    			pr=line.strip();
+    			int broj_razmaka=line.length()-line.trim().length();
+    			pr=line.trim();
     			lexJed pom;
     			if(pr.startsWith("<"))
     			{
@@ -107,13 +107,14 @@ public class SemantickiAnalizator
     	System.out.print(cvor.getjedinkaIDN()+" ::= ");
     	for (Cvor baby : cvor.getdjeca())
     	{
-    		if(baby.getjedinkaIDN().equals("<"))
+    		if(baby.getjedinkaIDN().startsWith("<"))
     		{
     			System.out.print(baby.getjedinkaIDN());
     		}
     		else
     		{
-    			System.out.print(baby.getjedinkaIDN()+"("+Integer.toString(baby.getjedinkaraz())+","+baby.getjedinkaime()+")");
+
+    			System.out.print(" "+baby.getjedinkaIDN()+" "+"("+Integer.toString(baby.getjedinkaraz())+","+baby.getjedinkaime()+")"+" ");
     		}
     	}  	
     	System.out.println("");
@@ -1128,6 +1129,15 @@ public class SemantickiAnalizator
     			trenutni_cvor.getdjeca().get(0).setntip(trenutni_cvor.gettip());
     			provjeri(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
     			provjeri(trenutni_cvor.getdjeca().get(2),trenutni_cvor_u_tablici_znakova);
+    			//neki try blokic
+    			try
+    			{
+    				boolean p=trenutni_cvor.getdjeca().get(0).gettip().get(0).equals("int") || trenutni_cvor.getdjeca().get(0).gettip().get(0).equals("const_int") || trenutni_cvor.getdjeca().get(0).gettip().get(0).equals("char") || trenutni_cvor.getdjeca().get(0).gettip().get(0).equals("const_char");
+    			}
+    			catch(Exception e)
+    			{
+    				greska(trenutni_cvor);
+    			}
     			if(trenutni_cvor.getdjeca().get(0).gettip().get(0).equals("int") || trenutni_cvor.getdjeca().get(0).gettip().get(0).equals("const_int") || trenutni_cvor.getdjeca().get(0).gettip().get(0).equals("char") || trenutni_cvor.getdjeca().get(0).gettip().get(0).equals("const_char"))
     			{
     				boolean t=provjeriTip(trenutni_cvor.getdjeca().get(2).gettip(),trenutni_cvor.getdjeca().get(0).gettip());
@@ -1283,7 +1293,10 @@ public class SemantickiAnalizator
     		{
     			provjeri(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
     			Cvor cvor_NIZ_ZNAKOVA=null;
-    			LinkedList<Cvor> treba_provjeriti=trenutni_cvor.getdjeca();
+    			LinkedList<Cvor> treba_provjeriti = new LinkedList<Cvor>();
+                treba_provjeriti.addAll(trenutni_cvor.getdjeca());
+                //ovo neje valjalo
+    			//LinkedList<Cvor> treba_provjeriti=trenutni_cvor.getdjeca();
     			
     			while(treba_provjeriti.size()>0)
     			{
@@ -1358,4 +1371,3 @@ public class SemantickiAnalizator
     }
 //kraj seman
 }
-
