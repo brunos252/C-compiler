@@ -104,20 +104,26 @@ public class SemantickiAnalizator
 
     private static void greska(Cvor cvor)
     {
-    	System.out.print(cvor.getjedinkaIDN()+" ::= ");
+        boolean first = true;
+        String ispis = cvor.getjedinkaIDN()+" ::= ";
     	for (Cvor baby : cvor.getdjeca())
     	{
+    	    //ispred svih djece koji nisu prvi treba ic razmak
+    	    if(first)
+    			first = false;
+    		else
+    			ispis += " ";
+    		
     		if(baby.getjedinkaIDN().startsWith("<"))
     		{
-    			System.out.print(baby.getjedinkaIDN());
+    		    ispis += baby.getjedinkaIDN();
     		}
     		else
     		{
-
-    			System.out.print(baby.getjedinkaIDN()+"("+Integer.toString(baby.getjedinkaraz())+","+baby.getjedinkaime()+")");
+                ispis += baby.getjedinkaIDN()+"("+Integer.toString(baby.getjedinkaraz())+","+baby.getjedinkaime()+")";
     		}
     	}  	
-    	System.out.println("");
+    	System.out.println(ispis);
         System.exit(0);
     }
 
