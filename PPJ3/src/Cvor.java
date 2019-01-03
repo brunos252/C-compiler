@@ -10,7 +10,8 @@ public class Cvor
     boolean l_izraz;
     lexJed jedinka;
     LinkedList<Cvor> djeca = new LinkedList<>();
-    LinkedList<String> tip, ntip=new LinkedList<>();
+    LinkedList<String> tip = new LinkedList<>();
+    LinkedList<String> ntip=new LinkedList<>();
     
     public Cvor()
     {
