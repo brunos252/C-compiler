@@ -58,6 +58,8 @@ public class SemantickiAnalizator
     	{
     		e.printStackTrace();
     	}
+    	
+    	
     	provjeri(korijen, korijen_znakova);
     	imaMain(korijen_znakova);
     	provjeriFun(korijen_znakova);
@@ -230,9 +232,18 @@ public class SemantickiAnalizator
     		//PROVJERI OVO 
         	else if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("ZNAK"))
         	{
+        		/*
         		if(!(trenutni_cvor.getdjeca().get(0).getjedinkaime().startsWith("\\") || trenutni_cvor.getdjeca().get(0).getjedinkaime().startsWith("\\n") || trenutni_cvor.getdjeca().get(0).getjedinkaime().startsWith("\\t") || trenutni_cvor.getdjeca().get(0).getjedinkaime().startsWith("\\0") || trenutni_cvor.getdjeca().get(0).getjedinkaime().startsWith("\\\'") || trenutni_cvor.getdjeca().get(0).getjedinkaime().startsWith("\\\"") || trenutni_cvor.getdjeca().get(0).getjedinkaime().startsWith("\\\\")))
         		{
         			greska(trenutni_cvor);
+        		}
+        		*/
+        		if(trenutni_cvor.getdjeca().get(0).getjedinkaime().startsWith("\\"))
+        		{
+        			if(!(trenutni_cvor.getdjeca().get(0).getjedinkaime().startsWith("\\n") || trenutni_cvor.getdjeca().get(0).getjedinkaime().startsWith("\\t") || trenutni_cvor.getdjeca().get(0).getjedinkaime().startsWith("\\0") || trenutni_cvor.getdjeca().get(0).getjedinkaime().startsWith("\\\'") || trenutni_cvor.getdjeca().get(0).getjedinkaime().startsWith("\\\"") || trenutni_cvor.getdjeca().get(0).getjedinkaime().startsWith("\\\\")))
+        			{
+        				greska(trenutni_cvor);
+        			}
         		}
         		LinkedList<String> tip=new LinkedList<>();
         		tip.add("char");
