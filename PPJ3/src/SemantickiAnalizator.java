@@ -114,7 +114,7 @@ public class SemantickiAnalizator
     		else
     		{
 
-    			System.out.print(" "+baby.getjedinkaIDN()+" "+"("+Integer.toString(baby.getjedinkaraz())+","+baby.getjedinkaime()+")"+" ");
+    			System.out.print(baby.getjedinkaIDN()+"("+Integer.toString(baby.getjedinkaraz())+","+baby.getjedinkaime()+")");
     		}
     	}  	
     	System.out.println("");
