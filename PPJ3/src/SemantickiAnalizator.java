@@ -993,8 +993,8 @@ public class SemantickiAnalizator
     				else
     				{
     					IDN=new identifikator(tipovi.get(i),trenutni_cvor.getdjeca().get(3).getIme().get(i),1,true);
-    					novi_cvor_znak.dodajIdentifikator(IDN);
     				}
+    				novi_cvor_znak.dodajIdentifikator(IDN);
     			}
     			provjeri(trenutni_cvor.getdjeca().get(5),novi_cvor_znak);
     			trenutni_cvor_u_tablici_znakova=trenutni_cvor_u_tablici_znakova.getroditelj();
