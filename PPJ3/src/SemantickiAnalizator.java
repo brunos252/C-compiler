@@ -933,6 +933,9 @@ public class SemantickiAnalizator
     				}
     			}
     			provjeri(trenutni_cvor.getdjeca().get(3),trenutni_cvor_u_tablici_znakova);
+    			//novi_cvor_znak se treba prije deklarirat jer ako se deklarira u bloku naredbi
+    			//onda mu je vidljivost samo u tom bloku, pa se na liniji <ova+29> nalazil prazan novi_cvor_znak (najbitnije, nije imal uDjelokrugu)
+				CvorZn novi_cvor_znak= new CvorZn();
     			if(IDN!=null)
     			{
     				if(IDN.getDD()==0)
@@ -946,7 +949,6 @@ public class SemantickiAnalizator
     						greska(trenutni_cvor);
     					}
     					IDN.setDD(1);
-    					CvorZn novi_cvor_znak= new CvorZn();
     					novi_cvor_znak.setuDjelokrugu(IDN.gettip());
     				}
     			}
@@ -958,7 +960,7 @@ public class SemantickiAnalizator
     				tip_funkcije.addAll(trenutni_cvor.getdjeca().get(3).gettip());
     				IDN = new identifikator(tip_funkcije, trenutni_cvor.getdjeca().get(1).getjedinkaime(),1,false);
     				trenutni_cvor_u_tablici_znakova.dodajIdentifikator(IDN);
-    				CvorZn novi_cvor_znak=new CvorZn();
+    				//CvorZn novi_cvor_znak=new CvorZn();
     				novi_cvor_znak.setuDjelokrugu(tip_funkcije);
     			}
     			novi_cvor_znak.setroditelj(trenutni_cvor_u_tablici_znakova);
