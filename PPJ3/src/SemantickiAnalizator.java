@@ -318,6 +318,11 @@ public class SemantickiAnalizator
     			{
     				greska(trenutni_cvor);
     			}
+    			
+				LinkedList<String> pom=new LinkedList<>();
+				pom.add(trenutni_cvor.getdjeca().get(0).gettip().get(1));
+				trenutni_cvor.setTip(pom);
+    			
     			if(trenutni_cvor.getdjeca().get(0).gettip().get(1).equals("const_int") || trenutni_cvor.getdjeca().get(0).gettip().get(1).equals("const_char"))
     			{
     				boolean p=false;
