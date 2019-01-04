@@ -1018,7 +1018,7 @@ public class SemantickiAnalizator
     		{
     			provjeri(trenutni_cvor.getdjeca().get(0),trenutni_cvor_u_tablici_znakova);
     			provjeri(trenutni_cvor.getdjeca().get(2),trenutni_cvor_u_tablici_znakova);
-    			if(trenutni_cvor.getdjeca().get(0).getjedinkaime().equals(trenutni_cvor.getdjeca().get(2).getjedinkaime()))
+    			if(trenutni_cvor.getdjeca().get(0).getIme().equals(trenutni_cvor.getdjeca().get(2).getIme()))
     			{
     				greska(trenutni_cvor);
     			}
