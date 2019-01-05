@@ -254,7 +254,7 @@ public class SemantickiAnalizator
         		trenutni_cvor.setTip(tip);
         		trenutni_cvor.setl_izraz(false);
         	}
-        	else if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("NIZ ZNAKOVA"))
+        	else if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("NIZ_ZNAKOVA"))
         	{
         		String niz=trenutni_cvor.getdjeca().get(0).getjedinkaime();
         		int index=niz.indexOf("\\");
