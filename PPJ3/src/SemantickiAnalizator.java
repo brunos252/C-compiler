@@ -254,7 +254,7 @@ public class SemantickiAnalizator
         		trenutni_cvor.setTip(tip);
         		trenutni_cvor.setl_izraz(false);
         	}
-        	else if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("NIZ ZNAKOVA"))
+        	else if(trenutni_cvor.getdjeca().get(0).getjedinkaIDN().equals("NIZ_ZNAKOVA"))
         	{
         		String niz=trenutni_cvor.getdjeca().get(0).getjedinkaime();
         		int index=niz.indexOf("\\");
@@ -518,8 +518,7 @@ public class SemantickiAnalizator
     				greska(trenutni_cvor);
     			}
     			String ps=trenutni_cvor.getdjeca().get(1).gettip().get(0);
-    			String x="const";
-    			x.concat(ps);
+    			String x="const_" + ps;
     			LinkedList<String> t=new LinkedList<>();
     			t.add(x);
     			trenutni_cvor.setTip(t);
