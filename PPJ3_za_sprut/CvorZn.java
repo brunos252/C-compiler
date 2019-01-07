@@ -46,6 +46,19 @@ public class CvorZn
             this.identifikatori.add(idn);
         }
 
+        public void clone(CvorZn original)
+        {
+            if(original.getroditelj() == null)
+                this.roditelj = null;
+            else {
+                this.roditelj = new CvorZn();
+                this.roditelj.clone(original.getroditelj());
+            }
+            this.identifikatori = (LinkedList<identifikator>) original.getidentifikatori().clone();
+            this.djeca = (LinkedList<CvorZn>) original.getdjeca().clone();
+            this.uDjelokrugu = (LinkedList<String>) original.uDjelokrugu.clone();
+        }
+
     public static class identifikator
     {
         LinkedList<String> tip;
@@ -78,7 +91,17 @@ public class CvorZn
         {
         	this.DD=DD;
         }
-        
+
+
+        public void clone(identifikator original)
+        {
+            this.tip = (LinkedList<String>) original.gettip().clone();
+            this.ime = original.getime();
+            this.DD = original.getDD();
+            this.l_izraz = original.getl_izraz();
+            this.vrijednost = original.vrijednost;
+        }
+
         public identifikator(LinkedList<String> tip, String ime, int DD, boolean l_izraz)
         {
         	this.tip=tip;
@@ -91,8 +114,6 @@ public class CvorZn
         public identifikator(){
             this.DD = -1;
             this.tip = new LinkedList<>();
-            this.ime = ime;
-            this.vrijednost = vrijednost;
             this.l_izraz = false;
         }
     }

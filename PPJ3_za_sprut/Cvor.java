@@ -9,7 +9,7 @@ public class Cvor
     lexJed jedinka;
     LinkedList<Cvor> djeca = new LinkedList<>();
     LinkedList<String> tip = new LinkedList<>();
-    LinkedList<String> ntip=new LinkedList<>();
+    LinkedList<String> ntip = new LinkedList<>();
     
     public Cvor()
     {
