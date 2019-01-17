@@ -6,17 +6,12 @@ public class Cvor
     LinkedList<String> ime;
     int brElem;
     boolean l_izraz;
-    lexJed jedinka;
+    leksJed jedinka;
     LinkedList<Cvor> djeca = new LinkedList<>();
     LinkedList<String> tip = new LinkedList<>();
     LinkedList<String> ntip = new LinkedList<>();
     
-    public Cvor()
-    {
-    	
-    }
-    
-    public void setjedinka(Cvor.lexJed jedinka)
+    public void setJedinka(Cvor.leksJed jedinka)
     {
     	this.jedinka=jedinka;
     }
@@ -51,7 +46,7 @@ public class Cvor
     	this.ime=ime;
     }
     
-    public lexJed getjedinka()
+    public leksJed getjedinka()
     {
     	return this.jedinka;
     }
@@ -100,35 +95,16 @@ public class Cvor
     	return this.jedinka.ime;
     }
 
-    @Override
-    public String toString() {
-        if((this.jedinka.IDN.startsWith("<")) || (this.jedinka.IDN.equals("$"))){
-            return this.jedinka.IDN;
-        }else{
-            return this.jedinka.IDN + " " + this.jedinka.ime + " " + this.jedinka.raz;
-        }
-    }
-
-    void printStablo(){
-        //TODO
-    }
-
-    public static class lexJed
+    public static class leksJed
     {
         String IDN, ime;
         int raz;
 
-        public lexJed(String IDN, String ime, int raz)
+        public leksJed(String IDN, String ime, int raz)
         {
             this.IDN = IDN;
             this.ime = ime;
             this.raz = raz;
-        }
-        
-
-        @Override
-        public String toString() {
-            return this.IDN + " " + this.raz + " " + this.ime;
         }
     }
 }
