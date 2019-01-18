@@ -1,18 +1,26 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.math.BigInteger;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
-public class SemantickiAnalizator 
+public class SemantickiAnalizator
 {
 	private static int loop =0;
 	private static Cvor korijen=new Cvor();
 	private static LinkedHashMap<Integer, Cvor> razinaCvora=new LinkedHashMap<Integer, Cvor>();
 	private static CvorTabZn korijenTabZn=new CvorTabZn();
 	private static boolean main = false;
+	private static Writer writer = null;
 
-    public static void main(String[] args) 
+    public static void main(String[] args) throws IOException 
     {
     	String line;
     	try(BufferedReader br = new BufferedReader(new InputStreamReader(System.in)))
@@ -51,6 +59,15 @@ public class SemantickiAnalizator
     	{
     		e.printStackTrace();
     	}
+    	
+    	//stvaranje output file-a
+    	File output = new File("./a.frisc");
+		try {
+			writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output, false)));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		writer.write("\tMOVE 40000, R7\n\tCALL F_MAIN\n\tHALT\n\n");
 
 		provjeriPrijevodnaJedinica(korijen, korijenTabZn);
 		    	
@@ -72,6 +89,10 @@ public class SemantickiAnalizator
     	}
 		
 		provjeriFun(korijenTabZn);
+    
+		writer.write("\n\n");
+		writer.close();
+		System.out.println("closed");
     }
 
     private static boolean provjeriFun(CvorTabZn korijen_znakova) {
@@ -90,7 +111,7 @@ public class SemantickiAnalizator
 		return true;
 	}
 
-	private static void provjeriPrimarniIzraz(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriPrimarniIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("IDN"))
 		{
@@ -187,7 +208,7 @@ public class SemantickiAnalizator
 		}
 	}
 
-	private static void provjeriPostfiksIzraz(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriPostfiksIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("<primarni_izraz>"))
 		{
@@ -299,7 +320,7 @@ public class SemantickiAnalizator
 		}
 	}
 
-	private static void provjeriListaArgumenata(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriListaArgumenata(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		if(trenutni.getdjeca().size() == 1)
 		{
@@ -319,7 +340,7 @@ public class SemantickiAnalizator
 		}
 	}
 
-	private static void provjeriUnarniIzraz(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriUnarniIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		if(trenutni.getdjeca().size() == 1)
 		{
@@ -360,7 +381,7 @@ public class SemantickiAnalizator
 		}
 	}
 
-	private static void provjeriCastIzraz(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriCastIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		if(trenutni.getdjeca().size() == 1)
 		{
@@ -427,7 +448,7 @@ public class SemantickiAnalizator
 		}
 	}
 
-	private static void provjeriMultiplikativniIzraz(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriMultiplikativniIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		LinkedList<String> po = new LinkedList<>();
 		po.add("OP_PUTA");
@@ -461,7 +482,7 @@ public class SemantickiAnalizator
 		}
 	}
 
-	private static void provjeriAditivniIzraz(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriAditivniIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		LinkedList<String> po = new LinkedList<>();
 		po.add("PLUS");
@@ -494,7 +515,7 @@ public class SemantickiAnalizator
 		}
 	}
 
-	private static void provjeriOdnosniIzraz(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriOdnosniIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		LinkedList<String> po = new LinkedList<>();
 		po.add("OP_LT");
@@ -530,7 +551,7 @@ public class SemantickiAnalizator
 		}
 	}
 
-	private static void provjeriJednakosniIzraz(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriJednakosniIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		LinkedList<String> po = new LinkedList<>();
 		po.add("OP_EQ");
@@ -563,7 +584,7 @@ public class SemantickiAnalizator
 		}
 	}
 
-	private static void provjeriBinIIzraz(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriBinIIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		LinkedList<String> po = new LinkedList<>();
 		po.add("OP_BIN_I");
@@ -595,7 +616,7 @@ public class SemantickiAnalizator
 		}
 	}
 
-	private static void provjeriBinXiliIzraz(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriBinXiliIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		LinkedList<String> po = new LinkedList<>();
 		po.add("OP_BIN_XILI");
@@ -627,7 +648,7 @@ public class SemantickiAnalizator
 		}
 	}
 
-	private static void provjeriBinIliIzraz(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriBinIliIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		LinkedList<String> po = new LinkedList<>();
 		po.add("OP_BIN_ILI");
@@ -659,7 +680,7 @@ public class SemantickiAnalizator
 		}
 	}
 
-	private static void provjeriLogIIzraz(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriLogIIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		LinkedList<String> po = new LinkedList<>();
 		po.add("OP_I");
@@ -691,7 +712,7 @@ public class SemantickiAnalizator
 		}
 	}
 
-	private static void provjeriLogIliIzraz(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriLogIliIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		LinkedList<String> po = new LinkedList<>();
 		po.add("OP_ILI");
@@ -723,7 +744,7 @@ public class SemantickiAnalizator
 		}
 	}
 
-	private static void provjeriIzrazPridruzivanja(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriIzrazPridruzivanja(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		if(trenutni.getdjeca().size() == 1)
 		{
@@ -749,7 +770,7 @@ public class SemantickiAnalizator
 		}
 	}
 
-	private static void provjeriIzraz(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		if(trenutni.getdjeca().size() == 1)
 		{
@@ -766,7 +787,7 @@ public class SemantickiAnalizator
 		}
 	}
 
-	private static void provjeriSlozenaNaredba(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriSlozenaNaredba(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		if(trenutni.getdjeca().size() == 3)
 		{
@@ -779,7 +800,7 @@ public class SemantickiAnalizator
 		}
 	}
 
-	private static void provjeriListaNaredbi(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriListaNaredbi(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		if(trenutni.getdjeca().size() == 1)
 		{
@@ -792,7 +813,7 @@ public class SemantickiAnalizator
 		}
 	}
 
-	private static void provjeriNaredba(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriNaredba(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("<slozena_naredba>"))
 		{
@@ -821,7 +842,7 @@ public class SemantickiAnalizator
 		}
 	}
 
-	private static void provjeriIzrazNaredba(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriIzrazNaredba(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("TOCKAZAREZ"))
 		{
@@ -836,7 +857,7 @@ public class SemantickiAnalizator
 		}
 	}
 
-	private static void provjeriNaredbaGrananja(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriNaredbaGrananja(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		if(trenutni.getdjeca().size()==5)
 		{
@@ -866,7 +887,7 @@ public class SemantickiAnalizator
 		}
 	}
 
-	private static void provjeriNaredbaPetlje(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriNaredbaPetlje(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		if(trenutni.getdjeca().size() == 5)
 		{
@@ -916,7 +937,7 @@ public class SemantickiAnalizator
 		}
 	}
 
-	private static void provjeriNaredbaSkoka(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriNaredbaSkoka(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("KR_CONTINUE") || trenutni.getdjeca().get(0).getjedinkaIDN().equals("KR_BREAK"))
 		{
@@ -946,11 +967,10 @@ public class SemantickiAnalizator
 			{
 				greska(trenutni);
 			}
-
 		}
 	}
 
-	private static void provjeriPrijevodnaJedinica(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriPrijevodnaJedinica(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		if(trenutni.getdjeca().size() == 1)
 		{
@@ -963,7 +983,7 @@ public class SemantickiAnalizator
 		}
 	}
 
-	private static void provjeriVanjskaDeklaracija(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriVanjskaDeklaracija(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("<definicija_funkcije>")) {
 			provjeriDefinicijaFunkcije(trenutni.getdjeca().get(0),trenutniZn);
@@ -974,7 +994,7 @@ public class SemantickiAnalizator
 		}
 	}
 
-	private static void provjeriDefinicijaFunkcije(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriDefinicijaFunkcije(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		if(trenutni.getdjeca().get(3).getjedinkaIDN().equals("KR_VOID"))
 		{
@@ -1161,7 +1181,7 @@ public class SemantickiAnalizator
 		}
 	}
 
-	private static void provjeriListaDeklaracija(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriListaDeklaracija(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		if(trenutni.getdjeca().size() == 1)
 		{
@@ -1174,7 +1194,7 @@ public class SemantickiAnalizator
 		}
 	}
 
-	private static void provjeriDeklaracija(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriDeklaracija(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 
 		provjeriImeTipa(trenutni.getdjeca().get(0),trenutniZn);
@@ -1182,7 +1202,7 @@ public class SemantickiAnalizator
 		provjeriListaInitDeklaratora(trenutni.getdjeca().get(1),trenutniZn);
 	}
 
-	private static void provjeriListaInitDeklaratora(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriListaInitDeklaratora(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		if(trenutni.getdjeca().size() == 1)
 		{
@@ -1198,7 +1218,7 @@ public class SemantickiAnalizator
 		}
 	}
 
-	private static void provjeriInitDeklarator(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriInitDeklarator(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		if(trenutni.getdjeca().size()==1)
 		{
@@ -1363,7 +1383,7 @@ public class SemantickiAnalizator
 		}
 	}
 
-	private static void provjeriInicijalizator(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriInicijalizator(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		if(trenutni.getdjeca().size() == 1)
 		{
@@ -1411,7 +1431,7 @@ public class SemantickiAnalizator
 		}
 	}
 
-	private static void provjeriListaIzrazaPridruzivanja(Cvor trenutni, CvorTabZn trenutniZn)
+	private static void provjeriListaIzrazaPridruzivanja(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		if(trenutni.getdjeca().size() == 1)
 		{
