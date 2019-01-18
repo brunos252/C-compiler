@@ -11,7 +11,7 @@ import java.math.BigInteger;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
-public class SemantickiAnalizator
+public class GeneratorKoda 
 {
 	private static int loop =0;
 	private static Cvor korijen=new Cvor();
@@ -90,7 +90,7 @@ public class SemantickiAnalizator
 		
 		provjeriFun(korijenTabZn);
     
-		writer.write("\n\n");
+		//writer.write("\n\n");
 		writer.close();
 		System.out.println("closed");
     }
@@ -164,6 +164,7 @@ public class SemantickiAnalizator
 			tip.add("int");
 			trenutni.setTip(tip);
 			trenutni.setl_izraz(false);
+			writer.write("\tMOVE %D 42, R0\n\tPUSH R0\n");
 		}
 		else if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("ZNAK"))
 		{
@@ -967,6 +968,9 @@ public class SemantickiAnalizator
 			{
 				greska(trenutni);
 			}
+			if(main) {
+				writer.write("\tPOP R6\n\tRET\n");
+			}
 		}
 	}
 
@@ -1029,6 +1033,10 @@ public class SemantickiAnalizator
 				pom.add("fun");
 				pom.add(trenutni.getdjeca().get(0).gettip().get(0));
 				pom.add("void");
+				if(trenutni.getdjeca().get(1).getjedinkaime().equals("main")) {
+					writer.write("F_MAIN");
+					main = true;
+				}
 				IDN=new CvorTabZn.identifikator(pom, trenutni.getdjeca().get(1).getjedinkaime(), 1, false);
 				trenutniZn.dodajIdentifikator(IDN);
 			}
@@ -1042,6 +1050,7 @@ public class SemantickiAnalizator
 			novi_cvor_znak.setUBloku(pom);
 			provjeriSlozenaNaredba(trenutni.getdjeca().get(5),novi_cvor_znak);
 			trenutniZn=trenutniZn.getroditelj();
+			main = false;
 		}
 		else if(trenutni.getdjeca().get(3).getjedinkaIDN().equals("<lista_parametara>"))
 		{
