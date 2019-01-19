@@ -10,6 +10,8 @@ import java.io.Writer;
 import java.math.BigInteger;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class GeneratorKoda 
 {
@@ -17,8 +19,19 @@ public class GeneratorKoda
 	private static Cvor korijen=new Cvor();
 	private static LinkedHashMap<Integer, Cvor> razinaCvora=new LinkedHashMap<Integer, Cvor>();
 	private static CvorTabZn korijenTabZn=new CvorTabZn();
+	//main je ako se nalazimo u main funkciji a inFunction je za bilokoju drugu funkciju
 	private static boolean main = false;
+	private static boolean inFunction = false;
 	private static Writer writer = null;
+	//globalne varijable koje se dodaju u strojni program na kraju
+	private static Map<String, String> globalVars = new TreeMap<String, String>();
+	private static String vrijednost = "";
+	private static String imeVar;
+	private static int odmak = 0;
+	private static int G_Count = 0;
+	private static boolean negative = false;
+	//tip varijable ili funkcije s kojom radimo
+	private static String type = "";
 
     public static void main(String[] args) throws IOException 
     {
@@ -69,8 +82,10 @@ public class GeneratorKoda
 		}
 		writer.write("\tMOVE 40000, R7\n\tCALL F_MAIN\n\tHALT\n\n");
 
+		//pocetak semanticke analize
 		provjeriPrijevodnaJedinica(korijen, korijenTabZn);
 		    	
+		//provjera main funkcije, nije potrebna za 4.lab
     	for(CvorTabZn.identifikator IDN:korijenTabZn.getidentifikatori())
     	{
     		if(IDN.getime().equals("main"))
@@ -90,7 +105,11 @@ public class GeneratorKoda
 		
 		provjeriFun(korijenTabZn);
     
-		//writer.write("\n\n");
+		if(!globalVars.isEmpty())
+			writer.write("\n");
+		for(String s : globalVars.keySet()) {
+			writer.write("G_" + s.toUpperCase() + "\tDW %D " + globalVars.get(s) + "\n");
+		}
 		writer.close();
 		System.out.println("closed");
     }
@@ -148,6 +167,17 @@ public class GeneratorKoda
 			}
 			trenutni.setTip(IDN.gettip());
 			trenutni.setl_izraz(IDN.getl_izraz());
+			
+			if(!IDN.gettip().get(0).equals("fun")) {
+				writer.write("\tLOAD R0, ");
+				//znaci da je globalna varijabla, inace je lokalna
+				if(globalVars.containsKey(IDN.getime().toUpperCase())) {
+					writer.write("(G_" + IDN.getime().toUpperCase() + ")\n");
+				} else {
+					writer.write("(R7 + " + odmak + ")\n");
+				}
+				writer.write("\tPUSH R0\n");
+			}
 		}
 		else if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("BROJ"))
 		{
@@ -164,7 +194,23 @@ public class GeneratorKoda
 			tip.add("int");
 			trenutni.setTip(tip);
 			trenutni.setl_izraz(false);
-			writer.write("\tMOVE %D 42, R0\n\tPUSH R0\n");
+			if(!trenutniZn.uBloku.isEmpty()) {
+				//2^19
+				BigInteger granica = new BigInteger(String.valueOf(524288));
+				if(big.compareTo(granica) == 1 || big.compareTo(granica.negate()) == -1) {
+					globalVars.put(String.valueOf(G_Count), trenutni.getdjeca().get(0).getjedinkaime());
+					writer.write("\tLOAD R0, (G_" + String.valueOf(G_Count++) + ")\n\tPUSH R0\n");
+				} else {
+					if(negative) {
+						writer.write("\tMOVE %D -" + trenutni.getdjeca().get(0).getjedinkaime() + ", R0\n\tPUSH R0\n");
+						negative = false;
+					} else
+						writer.write("\tMOVE %D " + trenutni.getdjeca().get(0).getjedinkaime() + ", R0\n\tPUSH R0\n");
+				}
+			} else {
+				//SAC mozda nije ovak
+				globalVars.put(imeVar.toUpperCase(), trenutni.getdjeca().get(0).getjedinkaime());
+			}
 		}
 		else if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("ZNAK"))
 		{
@@ -368,6 +414,9 @@ public class GeneratorKoda
 		}
 		else
 		{
+			//unarni operator
+			if(trenutni.getdjeca().get(0).getdjeca().get(0).getjedinkaIDN().equals("MINUS"))
+				negative = true;
 			provjeriCastIzraz(trenutni.getdjeca().get(1), trenutniZn);
 			LinkedList<String> pr=new LinkedList<>();
 			pr.add("int");
@@ -378,7 +427,6 @@ public class GeneratorKoda
 			}
 			trenutni.setTip(pr);
 			trenutni.setl_izraz(false);
-
 		}
 	}
 
@@ -1304,6 +1352,7 @@ public class GeneratorKoda
 			IDN=new CvorTabZn.identifikator(trenutni.getntip(),trenutni.getdjeca().get(0).getjedinkaime(),1,true);
 			trenutniZn.dodajIdentifikator(IDN);
 			trenutni.setTip(trenutni.getntip());
+			imeVar = trenutni.getdjeca().get(0).getjedinkaime();
 		}
 		else if(trenutni.getdjeca().get(2).getjedinkaIDN().equals("BROJ"))
 		{
