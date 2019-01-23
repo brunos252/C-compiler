@@ -7,9 +7,18 @@ public class Cvor
     int brElem;
     boolean l_izraz;
     leksJed jedinka;
+    private String vrijednost;
     LinkedList<Cvor> djeca = new LinkedList<>();
     LinkedList<String> tip = new LinkedList<>();
     LinkedList<String> ntip = new LinkedList<>();
+    
+    public void setVrijednost(String vrijednost) {
+    	this.vrijednost = vrijednost;
+    }
+    
+    public String getVrijednost() {
+    	return vrijednost;
+    }
     
     public void setJedinka(Cvor.leksJed jedinka)
     {
