@@ -1,8 +1,11 @@
+package hehe;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -27,11 +30,18 @@ public class GeneratorKoda
 	private static String imeVar;
 	private static int G_Count = 0;
 	private static boolean negative = false;
+	private static Map<String, Integer> odmak=new LinkedHashMap<String, Integer>();
+	private static int dodatni_odmak=0;
+	private static int trenutni_odmak=0;
+	private static int PUSH_CNT=0;
+	private static int POP_CNT=0;
 
     public static void main(String[] args) throws IOException 
     {
     	String line;
-    	try(BufferedReader br = new BufferedReader(new InputStreamReader(System.in)))
+    	
+    	//CITANJE ULAZ try(BufferedReader br = new BufferedReader(new InputStreamReader(System.in)))
+    	try(BufferedReader br = new BufferedReader(new FileReader("C:\\OOP\\kraj\\test.txt")))
 		{
     		line=br.readLine();
     		String pr=line.trim();
@@ -102,8 +112,13 @@ public class GeneratorKoda
     
 		if(!globalVars.isEmpty())
 			writer.write("\n");
-		for(String s : globalVars.keySet()) {
-			writer.write("G_" + s.toUpperCase() + "\tDW %D " + globalVars.get(s) + "\n");
+		for(String s : globalVars.keySet()) 
+		{
+			if(!(globalVars.get(s)==null))
+			{
+				writer.write("G_" + s.toUpperCase() + "\tDW %D " + globalVars.get(s) + "\n");
+			}
+			
 		}
 		writer.close();
 		System.out.println("closed");
@@ -124,11 +139,40 @@ public class GeneratorKoda
     	}
 		return true;
 	}
+    
+    //efka dodano
+    private static boolean nadi_funkciju(Cvor pom)
+    {
+    	LinkedList<String> ime=pom.getIme();
+    	String name="";
+    	if(ime!=null)
+    	{
+    		name=ime.get(0);
+    	}
+    	else
+    	{
+    		return false;
+    	}
+    	for(CvorTabZn.identifikator i:korijenTabZn.getidentifikatori())
+    	{
+    		if(i.gettip().get(0).equals("fun"))
+    		{
+    			if(name.equals(i.getime()))
+    			{
+    				return true;
+    			}
+    		}
+    	}
+    	return false;
+    }
+    
 
 	private static void provjeriPrimarniIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
+		System.err.println("<primarni_izraz>");
 		if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("IDN"))
 		{
+			
 			CvorTabZn.identifikator IDN = null;
 			Cvor cv = trenutni.getdjeca().get(0);
 			CvorTabZn cvTabZn = new CvorTabZn();
@@ -155,6 +199,8 @@ public class GeneratorKoda
 					break;
 				}
 			}
+			
+			//CvorTabZn.identifikator IDN=nadiJedUTren(trenutni.getdjeca().get(0),trenutniZn);
 
 			if (IDN==null)
 			{
@@ -162,17 +208,35 @@ public class GeneratorKoda
 			}
 			trenutni.setTip(IDN.gettip());
 			trenutni.setl_izraz(IDN.getl_izraz());
-			trenutni.setVrijednost(IDN.vrijednost);
+			trenutni.setVrijednost(IDN.getVrijednost());
+			LinkedList<String> xx=new LinkedList<>();
+			xx.add(IDN.getime());
+			trenutni.setIme(xx);
 			
-			if(!IDN.gettip().get(0).equals("fun")) {
+			if(!IDN.gettip().get(0).equals("fun")) 
+			{
 				writer.write("\tLOAD R0, ");
 				//znaci da je globalna varijabla, inace je lokalna
-				if(globalVars.containsKey(IDN.getime().toUpperCase())) {
+				if(globalVars.containsKey(IDN.getime().toUpperCase())) 
+				{
 					writer.write("(G_" + IDN.getime().toUpperCase() + ")\n");
-				} /*else {
-					writer.write("(R7 + " + odmak + ")\n");
-				}*/
+				} 
+				else 
+				{
+					int vr=0;
+					if(odmak.get(IDN.getime())==null)
+					{
+						vr=dodatni_odmak;
+					}
+					else
+					{
+						vr=odmak.get(IDN.getime())+dodatni_odmak;
+					}
+					
+					writer.write("(R7 + " + Integer.toHexString(vr).substring(0).toUpperCase() + ")\n");
+				}
 				writer.write("\tPUSH R0\n");
+				PUSH_CNT+=1;
 			}
 		}
 		else if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("BROJ"))
@@ -192,25 +256,51 @@ public class GeneratorKoda
 			trenutni.setl_izraz(false);
 			//SAC krivo vjv
 			//int h = Integer.parseInt(trenutni.getntip().get(0));
-			int l = Integer.parseInt(trenutni.getdjeca().get(0).getjedinkaime());
-			trenutni.setVrijednost(String.valueOf(1 * l));
-			if(!trenutniZn.uBloku.isEmpty()) {
+			//PROVJERI EFKA OVO PROVJERITI HMM
+			//izbrisano *Integer.parseInt(trenutni.getntip().get(0) u int l=
+			int predzn=1;
+			if(trenutni.getntip().isEmpty())
+			{
+				predzn=1;
+			}
+			else
+			{
+				predzn=Integer.parseInt(trenutni.getntip().get(0));
+			}
+			System.out.println(trenutni.getdjeca().get(0).getjedinkaime());
+			int l = Integer.parseInt(trenutni.getdjeca().get(0).getjedinkaime())*predzn;
+			trenutni.setVrijednost(String.valueOf(l));
+			if(!trenutniZn.uBloku.isEmpty()) 
+			{
 				//2^19
 				BigInteger granica = new BigInteger(String.valueOf(524288));
-				if(big.compareTo(granica) == 1 || big.compareTo(granica.negate()) == -1) {
+				if(big.compareTo(granica) == 1 || big.compareTo(granica.negate()) == -1) 
+				{
 					globalVars.put(String.valueOf(G_Count), trenutni.getdjeca().get(0).getjedinkaime());
 					writer.write("\tLOAD R0, (G_" + String.valueOf(G_Count++) + ")\n\tPUSH R0\n");
-				} else {
-					if(negative) {
-					//if(Integer.parseInt(trenutni.getVrijednost()) < 0) {
-						writer.write("\tMOVE %D -" + trenutni.getdjeca().get(0).getjedinkaime() + ", R0\n\tPUSH R0\n");
-						negative = false;
-					} else
-						writer.write("\tMOVE %D " + trenutni.getdjeca().get(0).getjedinkaime() + ", R0\n\tPUSH R0\n");
+					PUSH_CNT+=1;
+				} 
+				else 
+				{
+					//if(negative) 
+					{
+						if(Integer.parseInt(trenutni.getVrijednost()) < 0) 
+						{
+							writer.write("\tMOVE %D -" + trenutni.getdjeca().get(0).getjedinkaime() + ", R0\n\tPUSH R0\n");
+							negative = false;
+						} 
+						else
+						{
+							writer.write("\tMOVE %D " + trenutni.getdjeca().get(0).getjedinkaime() + ", R0\n\tPUSH R0\n");
+						}
+						PUSH_CNT+=1;	
+					}
 				}
-			} else {
-				globalVars.put(imeVar.toUpperCase(), trenutni.getdjeca().get(0).getjedinkaime());
 			}
+				else 
+				{
+					globalVars.put(imeVar.toUpperCase(), trenutni.getdjeca().get(0).getjedinkaime());
+				}
 		}
 		else if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("ZNAK"))
 		{
@@ -257,15 +347,19 @@ public class GeneratorKoda
 
 	private static void provjeriPostfiksIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
+		System.err.println("<postfiks_izraz>");
 		if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("<primarni_izraz>"))
 		{
-			//SACtrenutni.getdjeca().get(0).setntip(trenutni.getntip());
+			//SAC
+			trenutni.getdjeca().get(0).setntip(trenutni.getntip());
 			provjeriPrimarniIzraz(trenutni.getdjeca().get(0), trenutniZn);
 			LinkedList<String> pr=trenutni.getdjeca().get(0).gettip();
 			trenutni.setTip(pr);
 			boolean priv=trenutni.getdjeca().get(0).getl_izraz();
 			trenutni.setl_izraz(priv);
-			//SACtrenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
+			//SAC
+			trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
+			trenutni.setIme(trenutni.getdjeca().get(0).getIme());
 		}
 		else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("L_UGL_ZAGRADA"))
 		{
@@ -321,8 +415,12 @@ public class GeneratorKoda
 				trenutni.setl_izraz(false);
 				
 				//SAC
-				//trenutni.setIme(trenutni.getdjeca().get(0).getIme());
-				//treba ici 	writer.write("\tCALL F_" + trenutni.getdjeca().get(0).getIme() + "\n");
+				trenutni.setIme(trenutni.getdjeca().get(0).getIme());
+				if(trenutni.getdjeca().get(0).getIme().size()!=1)
+				{
+					System.err.println("GRESKA NA LINIJI 378 OTPRILIKE");
+				}
+				writer.write("\tCALL F_" + trenutni.getdjeca().get(0).getIme().get(0).toUpperCase() + "\n");
 				//writer.write("\tCALL F_F\n");
 			}
 			else if(trenutni.getdjeca().get(2).getjedinkaIDN().equals("<lista_argumenata>"))
@@ -354,28 +452,46 @@ public class GeneratorKoda
 				trenutni.setTip(p);
 				trenutni.setl_izraz(false);
 				//SAC
-				//trenutni.setIme(trenutni.getdjeca().get(0).getIme());
-				/*
-				//stavi predane parametre za funkciju na stog
-				for(int i = 0; i < trenutni.getdjeca().get(2).getIme().size(); i++) {
+				trenutni.setIme(trenutni.getdjeca().get(0).getIme());
+				
+				//stavi predane parametre za funkciju na stog;
+				int hhh=0;
+				if(trenutni.getdjeca().get(2).getIme()==null)
+				{
+					hhh=0;
+				}
+				else
+				{
+					hhh=trenutni.getdjeca().get(2).getIme().size();
+				}
+				for(int i = 0; i < hhh; i++) 
+				{
 					//param je konstanta
 					if(trenutni.getdjeca().get(2).getIme().get(i).equals("")) {
-						writer.write("\tMOVE %D " + trenutni.getdjeca().get(2).getVrijednost() + "\n");
+						writer.write("\tMOVE %D " + trenutni.getdjeca().get(2).getVrijednost() + ", R0"+ "\n");
 					}
 					
 					//param je var
-					else {
+					else 
+					{
 						//ako je globalna
 						if(globalVars.keySet().contains(trenutni.getdjeca().get(2).getIme().get(i))) {
 							writer.write("\tLOAD R0, (G_" + trenutni.getdjeca().get(2).getIme() + "\n");
-						} else {
-							writer.write("\tLOAD R0, (R7 + " + odmak + "\n");
+						} 
+						else 
+						{
+							int vr=odmak.get(trenutni.getdjeca().get(2).getIme().get(i))+dodatni_odmak;
+							writer.write("\tLOAD R0, (R7 + " + vr + "\n");
 						}
 					}
 					writer.write("\tPUSH R0\n");
+					PUSH_CNT+=1;
 				}
-				writer.write("\tCALL F_" + trenutni.getdjeca().get(0).getIme() + "\n");
-				//writer.write("\tADD R7, " + );*/
+				writer.write("\tCALL F_" + trenutni.getdjeca().get(0).getIme().get(0).toUpperCase() + "\n");
+				//PROVJERITI EFKA
+				int vr=trenutni.getdjeca().get(2).gettip().size()*4;
+				writer.write("\tADD R7, " + Integer.toHexString(vr).substring(0) + ", R7"+"\n");
+				writer.write("\tPUSH R6\n");
 			}
 		}
 		else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_INC") || trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_DEC"))
@@ -399,12 +515,13 @@ public class GeneratorKoda
 
 	private static void provjeriListaArgumenata(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
-		if(trenutni.getdjeca().size() == 1)
+		System.err.println("<lista_argumenata>");
+		if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("<izraz_pridruzivanja>"))
 		{
 			provjeriIzrazPridruzivanja(trenutni.getdjeca().get(0),trenutniZn);
 			trenutni.setTip(trenutni.getdjeca().get(0).gettip());
-			//trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
-			//trenutni.setIme(trenutni.getdjeca().get(0).getIme());
+			trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
+			trenutni.setIme(trenutni.getdjeca().get(0).getIme());
 
 		}
 		else
@@ -416,27 +533,63 @@ public class GeneratorKoda
 			pr=trenutni.getdjeca().get(0).gettip();
 			dr=trenutni.getdjeca().get(2).gettip();
 			pr.addAll(dr);
-			//trenutni.setTip(pr);
-			//trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost() + trenutni.getdjeca().get(2).getVrijednost());
+			trenutni.setTip(pr);
+			int vr1=0;
+			int vr2=0;
+			if(trenutni.getdjeca().get(0).getVrijednost()==null)
+			{
+				vr1=0;
+			}
+			else
+			{
+				vr1=Integer.parseInt(trenutni.getdjeca().get(0).getVrijednost());
+			}
+			if(trenutni.getdjeca().get(2).getVrijednost()==null)
+			{
+				vr2=0;
+			}
+			else
+			{
+				vr2=Integer.parseInt(trenutni.getdjeca().get(2).getVrijednost());
+			}
+			int ass=vr1+vr2;	
+			trenutni.setVrijednost(String.valueOf(ass));
+			LinkedList<String> gas=new LinkedList<>();
+			gas.addAll(trenutni.getdjeca().get(0).getIme());
+			gas.addAll(trenutni.getdjeca().get(2).getIme());
+			trenutni.setIme(gas);
 		}
 	}
 
 	private static void provjeriUnarniIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
-		if(trenutni.getdjeca().size() == 1)
+		System.err.println("<unarni_izraz>");
+		if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("<postfiks_izraz>"))
 		{
+			if(trenutni.getntip().size()==0)
+			{
+				LinkedList<String> pom = new LinkedList<String>();
+				pom.add("1");
+				trenutni.setntip(pom);
+			}
+			else
+			{
+				trenutni.getdjeca().get(0).setntip(trenutni.getntip());
+			}
 			provjeriPostfiksIzraz(trenutni.getdjeca().get(0),trenutniZn);
 			trenutni.setTip(trenutni.getdjeca().get(0).gettip());
 			trenutni.setl_izraz(trenutni.getdjeca().get(0).getl_izraz());
-			//trenutni.setIme(trenutni.getdjeca().get(0).getIme());
-			//trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
+			trenutni.setIme(trenutni.getdjeca().get(0).getIme());
+			trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
 		}
 		else if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("OP_INC") || trenutni.getdjeca().get(0).getjedinkaIDN().equals("OP_DEC"))
 		{
-			/*LinkedList<String> pom = new LinkedList<String>();
+			LinkedList<String> pom = new LinkedList<String>();
 			pom.add("1");
-			trenutni.setntip(pom);*/
+			trenutni.setntip(pom);
+			
 			provjeriUnarniIzraz(trenutni.getdjeca().get(1), trenutniZn);
+			
 			if(!trenutni.getdjeca().get(1).getl_izraz())
 			{
 				greska(trenutni);
@@ -451,29 +604,41 @@ public class GeneratorKoda
 			trenutni.setTip(pr);
 			trenutni.setl_izraz(false);
 		}
-		else
+		else if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("<unarni_operator>"))
 		{
+			System.err.println("<unarni_operator>");
 			//unarni operator
-			//LinkedList<String> pom = new LinkedList<String>();
+			Cvor unarni_operator=trenutni.getdjeca().get(0);
+			LinkedList<String> pom = new LinkedList<String>();
 			//SAC i tu je krivo valjda
-			if(trenutni.getdjeca().get(0).getdjeca().get(0).getjedinkaIDN().equals("MINUS")) {
+			if(trenutni.getdjeca().get(0).getdjeca().get(0).getjedinkaIDN().equals("MINUS")) 
+			{
 				System.out.println("aaL " + trenutni.getdjeca().get(1).getVrijednost());
 				negative = true;
-				//pom.add("-1");
-			} else {
-				//pom.add("1");
+				pom.add("-1");
+			} 
+			else 
+			{
+				pom.add("1");
 			}
-			//trenutni.getdjeca().get(1).setntip(pom);
+			trenutni.getdjeca().get(1).setntip(pom);
 
 			
 			provjeriCastIzraz(trenutni.getdjeca().get(1), trenutniZn);
 			LinkedList<String> pr=new LinkedList<>();
 
 			//SAC nekaj krivo
-			/*if(trenutni.getdjeca().get(0).getdjeca().get(0).getjedinkaIDN().equals("MINUS")) {
-				trenutni.setVrijednost("-" + trenutni.getdjeca().get(1).getVrijednost());
-			} else
-				trenutni.setVrijednost(trenutni.getdjeca().get(1).getVrijednost());*/
+			System.out.println(trenutni.getdjeca().get(1).getVrijednost());
+			if(trenutni.getdjeca().get(0).getdjeca().get(0).getjedinkaIDN().equals("MINUS")) 
+			{
+				LinkedList<String> ss=new LinkedList<>();
+				trenutni.setVrijednost(trenutni.getdjeca().get(1).getVrijednost());
+			} 
+			else
+			{
+				trenutni.setVrijednost(trenutni.getdjeca().get(1).getVrijednost());
+			}
+				
 			
 			pr.add("int");
 			boolean t=implProvjera(trenutni.getdjeca().get(1).gettip(),pr);
@@ -488,14 +653,15 @@ public class GeneratorKoda
 
 	private static void provjeriCastIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
-		if(trenutni.getdjeca().size() == 1)
+		System.err.println("<cast_izraz>");
+		if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("<unarni_izraz>"))
 		{
 			trenutni.getdjeca().get(0).setntip(trenutni.getntip());
 			provjeriUnarniIzraz(trenutni.getdjeca().get(0), trenutniZn);
 			trenutni.setTip(trenutni.getdjeca().get(0).gettip());
 			trenutni.setl_izraz(trenutni.getdjeca().get(0).getl_izraz());
-			//trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
-			//trenutni.setIme(trenutni.getdjeca().get(0).getIme());
+			trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
+			trenutni.setIme(trenutni.getdjeca().get(0).getIme());
 		}
 		else
 		{
@@ -511,13 +677,14 @@ public class GeneratorKoda
 			}
 			trenutni.setTip(trenutni.getdjeca().get(1).gettip());
 			trenutni.setl_izraz(false);
-			//trenutni.setVrijednost(trenutni.getdjeca().get(3).getVrijednost());
+			trenutni.setVrijednost(trenutni.getdjeca().get(3).getVrijednost());
 		}
 	}
 
 	private static void provjeriImeTipa(Cvor trenutni, CvorTabZn trenutniZn)
 	{
-		if(trenutni.getdjeca().size() == 1)
+		System.err.println("<ime_tipa>");
+		if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("<specifikator_tipa>"))
 		{
 			provjeriSpecifikatorTipa(trenutni.getdjeca().get(0), trenutniZn);
 			trenutni.setTip(trenutni.getdjeca().get(0).gettip());
@@ -539,19 +706,23 @@ public class GeneratorKoda
 
 	private static void provjeriSpecifikatorTipa(Cvor trenutni, CvorTabZn trenutniZn)
 	{
+		System.err.println("<specifikator_tipa>");
 		LinkedList<String> pom=new LinkedList<>();
 		if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("KR_VOID"))
 		{
+			System.err.println("KR_VOID");
 			pom.add("void");
 			trenutni.setTip(pom);
 		}
 		else if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("KR_CHAR"))
 		{
+			System.err.println("KR_CHAR");
 			pom.add("char");
 			trenutni.setTip(pom);
 		}
 		else
 		{
+			System.err.println("KR_INT");
 			pom.add("int");
 			trenutni.setTip(pom);
 		}
@@ -559,20 +730,24 @@ public class GeneratorKoda
 
 	private static void provjeriMultiplikativniIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
+		System.err.println("<multiplikativni_izraz>");
+		//mozda ne valja funkcionalnost
 		LinkedList<String> po = new LinkedList<>();
 		po.add("OP_PUTA");
 		po.add("OP_DIJELI");
 		po.add("OP_MOD");
 		if(trenutni.getdjeca().size() == 1)
 		{
+			
 			provjeriCastIzraz(trenutni.getdjeca().get(0),trenutniZn);
 			trenutni.setTip(trenutni.getdjeca().get(0).gettip());
 			trenutni.setl_izraz(trenutni.getdjeca().get(0).getl_izraz());
-			//trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
-			//trenutni.setIme(trenutni.getdjeca().get(0).getIme());
+			trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
+			trenutni.setIme(trenutni.getdjeca().get(0).getIme());
 		}
 		else if(po.contains(trenutni.getdjeca().get(1).getjedinkaIDN()))
 		{
+			System.err.println(trenutni.getdjeca().get(0).getjedinkaIDN()  + "   linija 656");
 			provjeriMultiplikativniIzraz(trenutni.getdjeca().get(0),trenutniZn);
 			LinkedList<String> pr=new LinkedList<>();
 			pr.add("int");
@@ -588,6 +763,31 @@ public class GeneratorKoda
 				greska(trenutni);
 			}
 			
+			if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("PLUS"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tADD R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+			
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("MINUS"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tSUB R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+                
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_I"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tAND R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_XILI"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tXOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_ILI"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+			POP_CNT+=1;
 			trenutni.setTip(pr);
 			trenutni.setl_izraz(false);
 
@@ -596,6 +796,7 @@ public class GeneratorKoda
 
 	private static void provjeriAditivniIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
+		System.err.println("<aditivni_izraz>");
 		LinkedList<String> po = new LinkedList<>();
 		po.add("PLUS");
 		po.add("MINUS");
@@ -604,8 +805,8 @@ public class GeneratorKoda
 			provjeriMultiplikativniIzraz(trenutni.getdjeca().get(0),trenutniZn);
 			trenutni.setTip(trenutni.getdjeca().get(0).gettip());
 			trenutni.setl_izraz(trenutni.getdjeca().get(0).getl_izraz());
-			//trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
-			//trenutni.setIme(trenutni.getdjeca().get(0).getIme());
+			trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
+			trenutni.setIme(trenutni.getdjeca().get(0).getIme());
 		}
 		else if(po.contains(trenutni.getdjeca().get(1).getjedinkaIDN()))
 		{
@@ -625,16 +826,30 @@ public class GeneratorKoda
 			}
 			
 			if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("PLUS"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tADD R0, R1, R0\n\tPUSH R0\n\n");
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("MINUS"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tSUB R0, R1, R0\n\tPUSH R0\n\n");
-			/*else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_I"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tAND R0, R1, R0\n\tPUSH R0\n\n");
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_XILI"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tXOR R0, R1, R0\n\tPUSH R0\n\n");
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_ILI"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tOR R0, R1, R0\n\tPUSH R0\n\n");*/
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tADD R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
 			
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("MINUS"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tSUB R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+                
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_I"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tAND R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_XILI"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tXOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_ILI"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+			POP_CNT+=1;
 			trenutni.setTip(pr);
 			trenutni.setl_izraz(false);
 
@@ -643,6 +858,7 @@ public class GeneratorKoda
 
 	private static void provjeriOdnosniIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
+		System.err.println("<odnosni_izraz>");
 		LinkedList<String> po = new LinkedList<>();
 		po.add("OP_LT");
 		po.add("OP_GT");
@@ -654,11 +870,12 @@ public class GeneratorKoda
 			provjeriAditivniIzraz(trenutni.getdjeca().get(0),trenutniZn);
 			trenutni.setTip(trenutni.getdjeca().get(0).gettip());
 			trenutni.setl_izraz(trenutni.getdjeca().get(0).getl_izraz());
-			//trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
-			//trenutni.setIme(trenutni.getdjeca().get(0).getIme());
+			trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
+			trenutni.setIme(trenutni.getdjeca().get(0).getIme());
 		}
 		else if(po.contains(trenutni.getdjeca().get(1).getjedinkaIDN()))
 		{
+			System.err.println(trenutni.getdjeca().get(0).getjedinkaIDN());
 			provjeriOdnosniIzraz(trenutni.getdjeca().get(0),trenutniZn);
 			LinkedList<String> pr=new LinkedList<>();
 			pr.add("int");
@@ -674,17 +891,31 @@ public class GeneratorKoda
 				greska(trenutni);
 			}
 			
-			/*if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("PLUS"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tADD R0, R1, R0\n\tPUSH R0\n\n");
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("MINUS"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tSUB R0, R1, R0\n\tPUSH R0\n\n");
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_I"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tAND R0, R1, R0\n\tPUSH R0\n\n");
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_XILI"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tXOR R0, R1, R0\n\tPUSH R0\n\n");
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_ILI"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tOR R0, R1, R0\n\tPUSH R0\n\n");*/
+			if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("PLUS"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tADD R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
 			
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("MINUS"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tSUB R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+                
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_I"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tAND R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_XILI"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tXOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_ILI"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+			POP_CNT+=1;
 			trenutni.setTip(pr);
 			trenutni.setl_izraz(false);
 
@@ -693,6 +924,7 @@ public class GeneratorKoda
 
 	private static void provjeriJednakosniIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
+		System.err.println("<jednakosni_izraz>");
 		LinkedList<String> po = new LinkedList<>();
 		po.add("OP_EQ");
 		po.add("OP_NEQ");
@@ -701,11 +933,12 @@ public class GeneratorKoda
 			provjeriOdnosniIzraz(trenutni.getdjeca().get(0),trenutniZn);
 			trenutni.setTip(trenutni.getdjeca().get(0).gettip());
 			trenutni.setl_izraz(trenutni.getdjeca().get(0).getl_izraz());
-			//trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
-			//trenutni.setIme(trenutni.getdjeca().get(0).getIme());
+			trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
+			trenutni.setIme(trenutni.getdjeca().get(0).getIme());
 		}
 		else if(po.contains(trenutni.getdjeca().get(1).getjedinkaIDN()))
 		{
+			System.err.println(trenutni.getdjeca().get(0).getjedinkaIDN());
 			provjeriJednakosniIzraz(trenutni.getdjeca().get(0),trenutniZn);
 			LinkedList<String> pr=new LinkedList<>();
 			pr.add("int");
@@ -721,17 +954,31 @@ public class GeneratorKoda
 				greska(trenutni);
 			}
 			
-			/*if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("PLUS"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tADD R0, R1, R0\n\tPUSH R0\n\n");
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("MINUS"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tSUB R0, R1, R0\n\tPUSH R0\n\n");
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_I"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tAND R0, R1, R0\n\tPUSH R0\n\n");
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_XILI"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tXOR R0, R1, R0\n\tPUSH R0\n\n");
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_ILI"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tOR R0, R1, R0\n\tPUSH R0\n\n");*/
+			if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("PLUS"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tADD R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
 			
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("MINUS"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tSUB R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+                
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_I"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tAND R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_XILI"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tXOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_ILI"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+			POP_CNT+=1;
 			trenutni.setTip(pr);
 			trenutni.setl_izraz(false);
 
@@ -740,6 +987,7 @@ public class GeneratorKoda
 
 	private static void provjeriBinIIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
+		System.err.println("<bin_i_izraz>");
 		LinkedList<String> po = new LinkedList<>();
 		po.add("OP_BIN_I");
 		if(trenutni.getdjeca().size() == 1)
@@ -747,11 +995,12 @@ public class GeneratorKoda
 			provjeriJednakosniIzraz(trenutni.getdjeca().get(0),trenutniZn);
 			trenutni.setTip(trenutni.getdjeca().get(0).gettip());
 			trenutni.setl_izraz(trenutni.getdjeca().get(0).getl_izraz());
-			//trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
-			//trenutni.setIme(trenutni.getdjeca().get(0).getIme());
+			trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
+			trenutni.setIme(trenutni.getdjeca().get(0).getIme());
 		}
 		else if(po.contains(trenutni.getdjeca().get(1).getjedinkaIDN()))
 		{
+			System.err.println(trenutni.getdjeca().get(0).getjedinkaIDN());
 			provjeriBinIIzraz(trenutni.getdjeca().get(0),trenutniZn);
 			LinkedList<String> pr=new LinkedList<>();
 			pr.add("int");
@@ -767,17 +1016,31 @@ public class GeneratorKoda
 				greska(trenutni);
 			}
 			
-			/*if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("PLUS"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tADD R0, R1, R0\n\tPUSH R0\n\n");
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("MINUS"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tSUB R0, R1, R0\n\tPUSH R0\n\n");
-			else*/ if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_I"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tAND R0, R1, R0\n\tPUSH R0\n\n");
-			/*else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_XILI"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tXOR R0, R1, R0\n\tPUSH R0\n\n");
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_ILI"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tOR R0, R1, R0\n\tPUSH R0\n\n");*/
+			if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("PLUS"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tADD R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
 			
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("MINUS"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tSUB R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+                
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_I"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tAND R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_XILI"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tXOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_ILI"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+			POP_CNT+=1;
 			trenutni.setTip(pr);
 			trenutni.setl_izraz(false);
 
@@ -786,6 +1049,7 @@ public class GeneratorKoda
 
 	private static void provjeriBinXiliIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
+		System.err.println("<bin_xili_izraz>");
 		LinkedList<String> po = new LinkedList<>();
 		po.add("OP_BIN_XILI");
 		if(trenutni.getdjeca().size() == 1)
@@ -793,11 +1057,12 @@ public class GeneratorKoda
 			provjeriBinIIzraz(trenutni.getdjeca().get(0),trenutniZn);
 			trenutni.setTip(trenutni.getdjeca().get(0).gettip());
 			trenutni.setl_izraz(trenutni.getdjeca().get(0).getl_izraz());
-			//trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
-			//trenutni.setIme(trenutni.getdjeca().get(0).getIme());
+			trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
+			trenutni.setIme(trenutni.getdjeca().get(0).getIme());
 		}
 		else if(po.contains(trenutni.getdjeca().get(1).getjedinkaIDN()))
 		{
+			System.err.println(trenutni.getdjeca().get(0).getjedinkaIDN());
 			provjeriBinXiliIzraz(trenutni.getdjeca().get(0),trenutniZn);
 			LinkedList<String> pr=new LinkedList<>();
 			pr.add("int");
@@ -813,17 +1078,31 @@ public class GeneratorKoda
 				greska(trenutni);
 			}
 			
-			/*if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("PLUS"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tADD R0, R1, R0\n\tPUSH R0\n\n");
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("MINUS"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tSUB R0, R1, R0\n\tPUSH R0\n\n");
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_I"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tAND R0, R1, R0\n\tPUSH R0\n\n");
-			else */if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_XILI"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tXOR R0, R1, R0\n\tPUSH R0\n\n");
-			/*else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_ILI"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tOR R0, R1, R0\n\tPUSH R0\n\n");*/
+			if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("PLUS"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tADD R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
 			
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("MINUS"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tSUB R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+                
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_I"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tAND R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_XILI"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tXOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_ILI"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+			POP_CNT+=1;
 			trenutni.setTip(pr);
 			trenutni.setl_izraz(false);
 
@@ -832,6 +1111,7 @@ public class GeneratorKoda
 
 	private static void provjeriBinIliIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
+		System.err.println("<bin_ili_izraz>");
 		LinkedList<String> po = new LinkedList<>();
 		po.add("OP_BIN_ILI");
 		if(trenutni.getdjeca().size() == 1)
@@ -839,11 +1119,12 @@ public class GeneratorKoda
 			provjeriBinXiliIzraz(trenutni.getdjeca().get(0),trenutniZn);
 			trenutni.setTip(trenutni.getdjeca().get(0).gettip());
 			trenutni.setl_izraz(trenutni.getdjeca().get(0).getl_izraz());
-			//trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
-			//trenutni.setIme(trenutni.getdjeca().get(0).getIme());
+			trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
+			trenutni.setIme(trenutni.getdjeca().get(0).getIme());
 		}
 		else if(po.contains(trenutni.getdjeca().get(1).getjedinkaIDN()))
 		{
+			System.err.println(trenutni.getdjeca().get(0).getjedinkaIDN());
 			provjeriBinIliIzraz(trenutni.getdjeca().get(0),trenutniZn);
 			LinkedList<String> pr=new LinkedList<>();
 			pr.add("int");
@@ -859,17 +1140,31 @@ public class GeneratorKoda
 				greska(trenutni);
 			}
 			
-			/*if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("PLUS"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tADD R0, R1, R0\n\tPUSH R0\n\n");
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("MINUS"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tSUB R0, R1, R0\n\tPUSH R0\n\n");
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_I"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tAND R0, R1, R0\n\tPUSH R0\n\n");
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_XILI"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tXOR R0, R1, R0\n\tPUSH R0\n\n");
-			else */if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_ILI"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tOR R0, R1, R0\n\tPUSH R0\n\n");
+			if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("PLUS"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tADD R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
 			
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("MINUS"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tSUB R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+                
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_I"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tAND R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_XILI"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tXOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_ILI"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+			POP_CNT+=1;
 			trenutni.setTip(pr);
 			trenutni.setl_izraz(false);
 
@@ -878,6 +1173,7 @@ public class GeneratorKoda
 
 	private static void provjeriLogIIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
+		System.err.println("<log_i_izraz>");
 		LinkedList<String> po = new LinkedList<>();
 		po.add("OP_I");
 		if(trenutni.getdjeca().size() == 1)
@@ -885,11 +1181,12 @@ public class GeneratorKoda
 			provjeriBinIliIzraz(trenutni.getdjeca().get(0),trenutniZn);
 			trenutni.setTip(trenutni.getdjeca().get(0).gettip());
 			trenutni.setl_izraz(trenutni.getdjeca().get(0).getl_izraz());
-			//trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
-			//trenutni.setIme(trenutni.getdjeca().get(0).getIme());
+			trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
+			trenutni.setIme(trenutni.getdjeca().get(0).getIme());
 		}
 		else if(po.contains(trenutni.getdjeca().get(1).getjedinkaIDN()))
 		{
+			System.err.println(trenutni.getdjeca().get(0).getjedinkaIDN());
 			provjeriLogIIzraz(trenutni.getdjeca().get(0),trenutniZn);
 			LinkedList<String> pr=new LinkedList<>();
 			pr.add("int");
@@ -905,17 +1202,31 @@ public class GeneratorKoda
 				greska(trenutni);
 			}
 			
-			/*if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("PLUS"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tADD R0, R1, R0\n\tPUSH R0\n\n");
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("MINUS"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tSUB R0, R1, R0\n\tPUSH R0\n\n");
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_I"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tAND R0, R1, R0\n\tPUSH R0\n\n");
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_XILI"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tXOR R0, R1, R0\n\tPUSH R0\n\n");
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_ILI"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tOR R0, R1, R0\n\tPUSH R0\n\n");*/
+			if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("PLUS"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tADD R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
 			
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("MINUS"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tSUB R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+                
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_I"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tAND R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_XILI"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tXOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_ILI"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+			POP_CNT+=1;
 			trenutni.setTip(pr);
 			trenutni.setl_izraz(false);
 
@@ -924,6 +1235,7 @@ public class GeneratorKoda
 
 	private static void provjeriLogIliIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
+		System.err.println("<log_ili_izraz");
 		LinkedList<String> po = new LinkedList<>();
 		po.add("OP_ILI");
 		if(trenutni.getdjeca().size() == 1)
@@ -931,11 +1243,12 @@ public class GeneratorKoda
 			provjeriLogIIzraz(trenutni.getdjeca().get(0),trenutniZn);
 			trenutni.setTip(trenutni.getdjeca().get(0).gettip());
 			trenutni.setl_izraz(trenutni.getdjeca().get(0).getl_izraz());
-			//trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
-			//trenutni.setIme(trenutni.getdjeca().get(0).getIme());
+			trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
+			trenutni.setIme(trenutni.getdjeca().get(0).getIme());
 		}
 		else if(po.contains(trenutni.getdjeca().get(1).getjedinkaIDN()))
 		{
+			System.err.println(trenutni.getdjeca().get(0).getjedinkaIDN());
 			provjeriLogIliIzraz(trenutni.getdjeca().get(0),trenutniZn);
 			LinkedList<String> pr=new LinkedList<>();
 			pr.add("int");
@@ -951,17 +1264,31 @@ public class GeneratorKoda
 				greska(trenutni);
 			}
 			
-			/*if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("PLUS"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tADD R0, R1, R0\n\tPUSH R0\n\n");
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("MINUS"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tSUB R0, R1, R0\n\tPUSH R0\n\n");
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_I"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tAND R0, R1, R0\n\tPUSH R0\n\n");
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_XILI"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tXOR R0, R1, R0\n\tPUSH R0\n\n");
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_ILI"))
-				writer.write("\tPOP R1\n\tPOP R0\n\tOR R0, R1, R0\n\tPUSH R0\n\n");*/
+			if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("PLUS"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tADD R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
 			
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("MINUS"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tSUB R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+                
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_I"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tAND R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_XILI"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tXOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+
+			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_ILI"))
+			{
+				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
+			}
+			POP_CNT+=1;
 			trenutni.setTip(pr);
 			trenutni.setl_izraz(false);
 
@@ -970,13 +1297,14 @@ public class GeneratorKoda
 
 	private static void provjeriIzrazPridruzivanja(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
-		if(trenutni.getdjeca().size() == 1)
+		System.err.println("<izraz_pridruzivanja>");
+		if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("<log_ili_izraz>"))
 		{
 			provjeriLogIliIzraz(trenutni.getdjeca().get(0),trenutniZn);
 			trenutni.setTip(trenutni.getdjeca().get(0).gettip());
 			trenutni.setl_izraz(trenutni.getdjeca().get(0).getl_izraz());
-			//trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
-			//trenutni.setIme(trenutni.getdjeca().get(0).getIme());
+			trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
+			trenutni.setIme(trenutni.getdjeca().get(0).getIme());
 		}
 		else
 		{
@@ -998,51 +1326,97 @@ public class GeneratorKoda
 
 	private static void provjeriIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
-		if(trenutni.getdjeca().size() == 1)
+		System.err.println("provjeri izraz");
+		if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("<izraz_pridruzivanja>"))
 		{
 			provjeriIzrazPridruzivanja(trenutni.getdjeca().get(0),trenutniZn);
 			trenutni.setTip(trenutni.getdjeca().get(0).gettip());
 			trenutni.setl_izraz(trenutni.getdjeca().get(0).getl_izraz());
-			//trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
-			//trenutni.setIme(trenutni.getdjeca().get(0).getIme());
+			trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
+			trenutni.setIme(trenutni.getdjeca().get(0).getIme());
 		}
 		else
 		{
 			provjeriIzraz(trenutni.getdjeca().get(0),trenutniZn);
 			provjeriIzrazPridruzivanja(trenutni.getdjeca().get(2),trenutniZn);
-			//trenutni.setTip(trenutni.getdjeca().get(2).gettip());
-			//trenutni.setl_izraz(false);
+			trenutni.setTip(trenutni.getdjeca().get(2).gettip());
+			trenutni.setl_izraz(false);
 		}
 	}
 
 	private static void provjeriSlozenaNaredba(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
-		if(trenutni.getdjeca().size() == 3)
+		System.err.println("provjeri slozena naredba");
+		if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("<lista_naredbi>"))
 		{
 			provjeriListaNaredbi(trenutni.getdjeca().get(1),trenutniZn);
 		}
-		else
+		else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("<lista_deklaracija>"))
 		{
 			provjeriListaDeklaracija(trenutni.getdjeca().get(1),trenutniZn);
+			
+			String broj=Integer.toHexString(trenutni.getdjeca().get(1).getBroj_varijabli()*4).toUpperCase();
+			LinkedList<Character> pp=new LinkedList<>();
+			pp.add('A');
+			pp.add('B');
+			pp.add('C');
+			pp.add('D');
+			pp.add('E');
+			pp.add('F');
+			
+			if(pp.contains(broj.charAt(0)))
+			{
+				writer.write("\tSUB R7, 0"+Integer.toHexString(trenutni.getdjeca().get(1).getBroj_varijabli()*4).substring(0).toUpperCase()+", R7\n");
+				PUSH_CNT+=1;
+			}
+			else
+			{
+				writer.write("\tSUB R7, "+Integer.toHexString(trenutni.getdjeca().get(1).getBroj_varijabli()*4).substring(0).toUpperCase()+", R7\n");
+				PUSH_CNT+=1;
+			}
+			
+			dodatni_odmak += trenutni.getdjeca().get(1).getBroj_varijabli() * 4;
 			provjeriListaNaredbi(trenutni.getdjeca().get(2),trenutniZn);
+			
+			if(pp.contains(broj.charAt(0)))
+			{
+				writer.write("\tADD R7, 0"+Integer.toHexString(trenutni.getdjeca().get(1).getBroj_varijabli()*4).substring(0).toUpperCase()+", R7\n");
+				POP_CNT+=1;
+			}
+			else
+			{
+
+				writer.write("\tADD R7, "+Integer.toHexString(trenutni.getdjeca().get(1).getBroj_varijabli()*4).substring(0).toUpperCase()+", R7\n");
+			POP_CNT+=1;
+			}
+			dodatni_odmak -= trenutni.getdjeca().get(1).getBroj_varijabli() * 4;
+		}
+		else
+		{
+			greska(trenutni);
 		}
 	}
 
 	private static void provjeriListaNaredbi(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
-		if(trenutni.getdjeca().size() == 1)
+		System.err.println("lista naredbi");
+		if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("<naredba>"))
 		{
 			provjeriNaredba(trenutni.getdjeca().get(0),trenutniZn);
 		}
 		else
 		{
 			provjeriListaNaredbi(trenutni.getdjeca().get(0),trenutniZn);
+			
+			
+			
 			provjeriNaredba(trenutni.getdjeca().get(1),trenutniZn);
 		}
 	}
 
 	private static void provjeriNaredba(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
+		System.err.println("naredba");
 		if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("<slozena_naredba>"))
 		{
 			CvorTabZn novi_cvor_znak = new CvorTabZn();
@@ -1072,6 +1446,7 @@ public class GeneratorKoda
 
 	private static void provjeriIzrazNaredba(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
+		System.err.println("izraz naredba");
 		if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("TOCKAZAREZ"))
 		{
 			LinkedList<String> pom=new LinkedList<>();
@@ -1087,6 +1462,7 @@ public class GeneratorKoda
 
 	private static void provjeriNaredbaGrananja(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
+		System.err.println("naredba grananja");
 		if(trenutni.getdjeca().size()==5)
 		{
 			provjeriIzraz(trenutni.getdjeca().get(2),trenutniZn);
@@ -1117,8 +1493,10 @@ public class GeneratorKoda
 
 	private static void provjeriNaredbaPetlje(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
+		System.err.println("naredba petlje");
 		if(trenutni.getdjeca().size() == 5)
 		{
+			System.out.println(trenutni.getdjeca().get(2).getjedinkaIDN());
 			provjeriIzraz(trenutni.getdjeca().get(2),trenutniZn);
 			LinkedList<String> pom = new LinkedList<>();
 			pom.add("int");
@@ -1134,6 +1512,7 @@ public class GeneratorKoda
 		}
 		else if(trenutni.getdjeca().size() == 6)
 		{
+			System.out.println(trenutni.getdjeca().get(2).getjedinkaIDN());
 			provjeriIzrazNaredba(trenutni.getdjeca().get(2),trenutniZn);
 			provjeriIzrazNaredba(trenutni.getdjeca().get(3),trenutniZn);
 			LinkedList<String> pom = new LinkedList<>();
@@ -1167,6 +1546,7 @@ public class GeneratorKoda
 
 	private static void provjeriNaredbaSkoka(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
+		System.err.println("naredba skoka");
 		if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("KR_CONTINUE") || trenutni.getdjeca().get(0).getjedinkaIDN().equals("KR_BREAK"))
 		{
 			if(loop <=0)
@@ -1190,41 +1570,52 @@ public class GeneratorKoda
 			}
 			LinkedList<String> pom=new LinkedList<>();
 			pom.add(trenutniZn.getUBloku().get(1));
-			boolean t=implProvjera(trenutni.getdjeca().get(1).gettip(),pom);
+			/*boolean t=implProvjera(trenutni.getdjeca().get(1).gettip(),pom);
 			if(!t)
 			{
 				greska(trenutni);
 			}
+			*/
 			//SAC
-			//if(!nadiFunkciju(trenutni.getdjeca().get(1).getIme()))
-			writer.write("\tPOP R6\n");
+			if(!nadi_funkciju(trenutni.getdjeca().get(1)))
+			{
+				writer.write("\tPOP R6\n");
+				POP_CNT+=1;
+			}
+			
 		}
 	}
 
 	private static void provjeriPrijevodnaJedinica(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
-		if(trenutni.getdjeca().size() == 1)
+		System.err.println("prijevodna jedinica");
+		if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("<vanjska_deklaracija>"))
 		{
 			provjeriVanjskaDeklaracija(trenutni.getdjeca().get(0),trenutniZn);
+			trenutni.setBroj_varijabli(trenutni.getdjeca().get(0).getBroj_varijabli());
 		}
 		else
 		{
 			provjeriPrijevodnaJedinica(trenutni.getdjeca().get(0),trenutniZn);
 			provjeriVanjskaDeklaracija(trenutni.getdjeca().get(1),trenutniZn);
+			trenutni.setBroj_varijabli(trenutni.getdjeca().get(0).getBroj_varijabli()+trenutni.getdjeca().get(1).getBroj_varijabli());
 			
-			//SAC
+			//SAC, EFKA FIX
 			//trenutni.brojVar = trenutni.getdjeca().get(0).brojVar + trenutni.getdjeca().get(1).brojVar;
 		}
 	}
 
 	private static void provjeriVanjskaDeklaracija(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
-		if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("<definicija_funkcije>")) {
+		System.err.println("vanjska deklaracija");
+		if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("<definicija_funkcije>")) 
+		{
 			provjeriDefinicijaFunkcije(trenutni.getdjeca().get(0),trenutniZn);
 		}
 		else
 		{
 			provjeriDeklaracija(trenutni.getdjeca().get(0),trenutniZn);
+			trenutni.setBroj_varijabli(trenutni.getdjeca().get(0).getBroj_varijabli());
 			//SAC
 			//trenutni.brojVar = trenutni.getdjeca().get(0).brojVar;
 		}
@@ -1232,6 +1623,7 @@ public class GeneratorKoda
 
 	private static void provjeriDefinicijaFunkcije(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
+		System.err.println("definicija funkcije");
 		if(trenutni.getdjeca().get(3).getjedinkaIDN().equals("KR_VOID"))
 		{
 			provjeriImeTipa(trenutni.getdjeca().get(0),trenutniZn);
@@ -1283,6 +1675,12 @@ public class GeneratorKoda
 			writer.write("F_" + trenutni.getdjeca().get(1).getjedinkaime().toUpperCase());
 			provjeriSlozenaNaredba(trenutni.getdjeca().get(5),novi_cvor_znak);
 			trenutniZn=trenutniZn.getroditelj();
+			System.out.println(PUSH_CNT + " " + POP_CNT);
+			int diff=PUSH_CNT-POP_CNT;
+			for(int i=0;i<diff;i++)
+			{
+				writer.write("\tADD R7, 4, R7\n");
+			}
 			writer.write("\tRET\n");
 			//main = false;
 		}
@@ -1303,7 +1701,15 @@ public class GeneratorKoda
 			}
 			provjeriListaParametara(trenutni.getdjeca().get(3),trenutniZn);
 			
-			//SAC
+			trenutni_odmak=4;
+			LinkedList<String> lista=trenutni.getdjeca().get(3).getIme();
+			for(int p=lista.size()-1;p>=0;p--)
+			{
+				String s=lista.get(p);
+				odmak.put(s, trenutni_odmak);
+				trenutni_odmak+=4;
+			}
+			//SAC, FIX EFKA
 			//trenutni_odmak = 8;
 			//jos toga
 			
@@ -1369,11 +1775,11 @@ public class GeneratorKoda
 				novi_cvor_znak.dodajIdentifikator(IDN);
 			}
 			
-			//writer.write("F_" + trenutni.getdjeca().get(1).getjedinkaime().toUpperCase() + "\n");
+			writer.write("F_" + trenutni.getdjeca().get(1).getjedinkaime().toUpperCase() + "\n");
 
 			provjeriSlozenaNaredba(trenutni.getdjeca().get(5),novi_cvor_znak);
 			
-			//writer.write("\tRET\n\n");
+			writer.write("\tRET\n");
 			
 			trenutniZn=trenutniZn.getroditelj();
 		}
@@ -1381,14 +1787,35 @@ public class GeneratorKoda
 
 	private static void provjeriListaParametara(Cvor trenutni, CvorTabZn trenutniZn)
 	{
-		if(trenutni.getdjeca().size() == 1)
+		System.err.println("lista parametara");
+		if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("<deklaracija_parametra>"))
 		{
 			provjeriDeklaracijaParametra(trenutni.getdjeca().get(0),trenutniZn);
-			//trenutni.setTip(trenutni.getdjeca().get(0).gettip());
-			//trenutni.setIme(trenutni.getdjeca().get(0).getIme());
+			trenutni.setTip(trenutni.getdjeca().get(0).gettip());
+			trenutni.setIme(trenutni.getdjeca().get(0).getIme());
 		}
 		else
 		{
+			/*
+			String pp=trenutni.getdjeca().get(0).getjedinkaIDN();
+			if(pp.equals("<lista_parametara>"))
+			{
+				provjeriListaParametara(trenutni.getdjeca().get(0),trenutniZn);
+			}
+			else if(pp.equals("<deklaracija_parametra>"))
+			{
+				provjeriDeklaracijaParametra(trenutni.getdjeca().get(0),trenutniZn);
+			}
+			else if(pp.equals("<ime_tipa>"))
+			{
+				provjeriImeTipa(trenutni.getdjeca().get(0),trenutniZn);
+			}
+			else if(pp.equals("<specifikator_tipa>"))
+			{
+				provjeriSpecifikatorTipa(trenutni.getdjeca().get(0),trenutniZn);
+			}
+			*/
+			//maknuto jer je bila greska i dodan gornji dio EFKA
 			provjeriListaParametara(trenutni.getdjeca().get(0),trenutniZn);
 			provjeriDeklaracijaParametra(trenutni.getdjeca().get(2),trenutniZn);
 			if(trenutni.getdjeca().get(0).getIme().equals(trenutni.getdjeca().get(2).getIme()))
@@ -1398,7 +1825,8 @@ public class GeneratorKoda
 			LinkedList<String> pom=trenutni.getdjeca().get(0).gettip();
 			pom.addAll(trenutni.getdjeca().get(2).gettip());
 			trenutni.setTip(pom);
-			LinkedList<String> t=trenutni.getdjeca().get(0).getIme();
+			LinkedList<String> t=new LinkedList<>();
+			t.addAll(trenutni.getdjeca().get(0).getIme());
 			t.addAll(trenutni.getdjeca().get(2).getIme());
 			trenutni.setIme(t);
 		}
@@ -1406,6 +1834,7 @@ public class GeneratorKoda
 
 	private static void provjeriDeklaracijaParametra(Cvor trenutni, CvorTabZn trenutniZn)
 	{
+		System.err.println("deklaracija parametra");
 		if(trenutni.getdjeca().size()==2)
 		{
 			provjeriImeTipa(trenutni.getdjeca().get(0),trenutniZn);
@@ -1437,9 +1866,11 @@ public class GeneratorKoda
 
 	private static void provjeriListaDeklaracija(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
-		if(trenutni.getdjeca().size() == 1)
+		System.err.println("lista deklaracija");
+		if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("<deklaracija>"))
 		{
 			provjeriDeklaracija(trenutni.getdjeca().get(0),trenutniZn);
+			trenutni.setBroj_varijabli(trenutni.getdjeca().get(0).getBroj_varijabli());
 			//SAC
 			//trenutni.brojVar = trenutni.getdjeca().get(0).brojVar;
 		}
@@ -1448,6 +1879,9 @@ public class GeneratorKoda
 			provjeriListaDeklaracija(trenutni.getdjeca().get(0),trenutniZn);
 			provjeriDeklaracija(trenutni.getdjeca().get(1),trenutniZn);
 			
+			//MOZDA KRIVO EFKA KRIVO KRIVO GET(1) + GET(0) MOZDA NEZ JEBIGA
+			trenutni.setBroj_varijabli(trenutni.getdjeca().get(0).getBroj_varijabli() + trenutni.getdjeca().get(0).getBroj_varijabli());
+			
 			//SAC
 			//trenutni.brojVar = trenutni.getdjeca().get(0).brojVar * 2;
 		}
@@ -1455,10 +1889,11 @@ public class GeneratorKoda
 
 	private static void provjeriDeklaracija(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
-
+		System.err.println("provjeri deklaracija");
 		provjeriImeTipa(trenutni.getdjeca().get(0),trenutniZn);
 		trenutni.getdjeca().get(1).setntip(trenutni.getdjeca().get(0).gettip());
 		provjeriListaInitDeklaratora(trenutni.getdjeca().get(1),trenutniZn);
+		trenutni.setBroj_varijabli(trenutni.getdjeca().get(1).getBroj_varijabli());
 		
 		//SAC
 		//trenutni.brojVar = trenutni.getdjeca().get(1).brojVar;
@@ -1466,10 +1901,12 @@ public class GeneratorKoda
 
 	private static void provjeriListaInitDeklaratora(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
-		if(trenutni.getdjeca().size() == 1)
+		System.err.println("lista init deklaratora");
+		if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("<init_deklarator>"))
 		{
 			trenutni.getdjeca().get(0).setntip(trenutni.getntip());
 			provjeriInitDeklarator(trenutni.getdjeca().get(0),trenutniZn);
+			trenutni.setBroj_varijabli(1);
 			//SAC
 			//trenutni.brojVar = 1;
 		}
@@ -1479,7 +1916,7 @@ public class GeneratorKoda
 			provjeriListaInitDeklaratora(trenutni.getdjeca().get(0),trenutniZn);
 			trenutni.getdjeca().get(2).setntip(trenutni.getntip());
 			provjeriInitDeklarator(trenutni.getdjeca().get(2),trenutniZn);
-			
+			trenutni.setBroj_varijabli(trenutni.getdjeca().get(0).getBroj_varijabli()+1);
 			//SAC
 			//trenutni.brojVar = trenutni.getdjeca().get(0).brojVar + 1;
 		}
@@ -1487,6 +1924,7 @@ public class GeneratorKoda
 
 	private static void provjeriInitDeklarator(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
+		System.err.println("init deklarator");
 		if(trenutni.getdjeca().size()==1)
 		{
 			trenutni.getdjeca().get(0).setntip(trenutni.getntip());
@@ -1498,6 +1936,12 @@ public class GeneratorKoda
 			if(trenutni.getdjeca().get(0).gettip().get(0).equals("niz") && (trenutni.getdjeca().get(0).gettip().get(1).equals("const_int") || trenutni.getdjeca().get(0).gettip().get(1).equals("const_char")))
 			{
 				greska(trenutni);
+			}
+			
+			trenutni.setBroj_varijabli(trenutni.getdjeca().get(0).getBroj_varijabli());
+			if(trenutniZn.getUBloku().isEmpty())
+			{
+				globalVars.put(trenutni.getdjeca().get(0).getdjeca().get(0).getjedinkaime(), "0");
 			}
 			
 			//SAC
@@ -1513,14 +1957,21 @@ public class GeneratorKoda
 			trenutni.getdjeca().get(0).setntip(trenutni.getntip());
 			provjeriIzravniDeklarator(trenutni.getdjeca().get(0),trenutniZn);
 			provjeriInicijalizator(trenutni.getdjeca().get(2),trenutniZn);
-						
+			
+			//EFKA NEZ KAJ S OVIM KRIVO MOZDA NEZ
+			CvorTabZn.identifikator IDN=nadiJedUTren(trenutni.getdjeca().get(0).getdjeca().get(0),trenutniZn);
+			IDN.setVrijednost(trenutni.getdjeca().get(2).getVrijednost());
+		    //IDN.vrijednost = trenutni_cvor.djeca[2].vrijednost
+			
+			
 			if(trenutni.getdjeca().get(0).gettip().get(0).equals("int") || trenutni.getdjeca().get(0).gettip().get(0).equals("const_int") || trenutni.getdjeca().get(0).gettip().get(0).equals("char") || trenutni.getdjeca().get(0).gettip().get(0).equals("const_char"))
 			{
-				boolean t=implProvjera(trenutni.getdjeca().get(2).gettip(),trenutni.getdjeca().get(0).gettip());
+				/*boolean t=implProvjera(trenutni.getdjeca().get(2).gettip(),trenutni.getdjeca().get(0).gettip());
 				if(!t)
 				{
 					greska(trenutni);
 				}
+				*/
 			}
 			else if(trenutni.getdjeca().get(0).gettip().get(0).equals("niz"))
 			{
@@ -1553,19 +2004,24 @@ public class GeneratorKoda
 				greska(trenutni);
 			}
 			
+			trenutni.setBroj_varijabli(trenutni.getdjeca().get(0).getBroj_varijabli());
+			
 			//SAC
 			//trenutni.brojVar = trenutni.getdjeca().get(0).brojVar;
 			
 			//SAC ovo je sjebavalo 2. primjer
+			//EFKA VRATIO U POGON
 			//ako se var nalazi u globalnom djelokrugu:
-			if(trenutniZn.getUBloku().isEmpty()) {
-				//globalVars.put(trenutni.getdjeca().get(0).getdjeca().get(0).getjedinkaime(), trenutni.getdjeca().get(2).getVrijednost());
+			if(trenutniZn.getUBloku().isEmpty()) 
+			{
+				globalVars.put(trenutni.getdjeca().get(0).getdjeca().get(0).getjedinkaime().toUpperCase(), trenutni.getdjeca().get(2).getVrijednost());
 			}
 		}
 	}
 
 	private static void provjeriIzravniDeklarator(Cvor trenutni, CvorTabZn trenutniZn)
 	{
+		System.err.println("izravni deklarator");
 		if(trenutni.getdjeca().size()==1)
 		{
 			if(trenutni.getdjeca().get(0).getntip().contains("void"))
@@ -1671,6 +2127,7 @@ public class GeneratorKoda
 
 	private static void provjeriInicijalizator(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
+		System.err.println("inicijalizator");
 		if(trenutni.getdjeca().size() == 1)
 		{
 			provjeriIzrazPridruzivanja(trenutni.getdjeca().get(0),trenutniZn);
@@ -1709,7 +2166,7 @@ public class GeneratorKoda
 				trenutni.setTip(trenutni.getdjeca().get(0).gettip());
 			}
 			
-			//trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
+			trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
 		}
 		else if(trenutni.getdjeca().size() == 3)
 		{
@@ -1721,6 +2178,7 @@ public class GeneratorKoda
 
 	private static void provjeriListaIzrazaPridruzivanja(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
+		System.err.println("lista izraza pridruzivanja");
 		if(trenutni.getdjeca().size() == 1)
 		{
 			provjeriIzrazPridruzivanja(trenutni.getdjeca().get(0),trenutniZn);
