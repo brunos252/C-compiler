@@ -1,3 +1,5 @@
+package hehe;
+
 import java.util.LinkedList;
 
 public class CvorTabZn 
@@ -68,6 +70,16 @@ public class CvorTabZn
         boolean l_izraz;
         String vrijednost;
         
+        public void setVrijednost(String vrijednost)
+        {
+        	this.vrijednost=vrijednost;
+        }
+        
+        public String getVrijednost()
+        {
+        	return this.vrijednost;
+        }
+        
         public boolean getl_izraz()
         {
         	return this.l_izraz;
@@ -120,4 +132,3 @@ public class CvorTabZn
         }
     }
 }
-
