@@ -1,5 +1,3 @@
-package hehe;
-
 import java.util.LinkedList;
 
 public class CvorTabZn 

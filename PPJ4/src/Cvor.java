@@ -1,4 +1,3 @@
-package hehe;
 import java.util.LinkedList;
 
 public class Cvor

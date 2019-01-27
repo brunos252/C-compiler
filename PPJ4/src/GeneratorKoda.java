@@ -1,11 +1,9 @@
-package hehe;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -22,10 +20,8 @@ public class GeneratorKoda
 	private static Cvor korijen=new Cvor();
 	private static LinkedHashMap<Integer, Cvor> razinaCvora=new LinkedHashMap<Integer, Cvor>();
 	private static CvorTabZn korijenTabZn=new CvorTabZn();
-	//main je ako se nalazimo u main funkciji a inFunction je za bilokoju drugu funkciju
 	private static boolean main = false;
 	private static Writer writer = null;
-	//globalne varijable koje se dodaju u strojni program na kraju
 	private static Map<String, String> globalVars = new TreeMap<String, String>();
 	private static String imeVar;
 	private static int G_Count = 0;
@@ -40,8 +36,7 @@ public class GeneratorKoda
     {
     	String line;
     	
-    	//CITANJE ULAZ try(BufferedReader br = new BufferedReader(new InputStreamReader(System.in)))
-    	try(BufferedReader br = new BufferedReader(new FileReader("C:\\OOP\\kraj\\test.txt")))
+    	try(BufferedReader br = new BufferedReader(new InputStreamReader(System.in)))
 		{
     		line=br.readLine();
     		String pr=line.trim();
@@ -78,7 +73,6 @@ public class GeneratorKoda
     		e.printStackTrace();
     	}
     	
-    	//stvaranje output file-a
     	File output = new File("./a.frisc");
 		try {
 			writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output, false)));
@@ -87,10 +81,8 @@ public class GeneratorKoda
 		}
 		writer.write("\tMOVE 40000, R7\n\tCALL F_MAIN\n\tHALT\n\n");
 
-		//pocetak semanticke analize
 		provjeriPrijevodnaJedinica(korijen, korijenTabZn);
 		    	
-		//provjera main funkcije, nije potrebna za 4.lab
     	for(CvorTabZn.identifikator IDN:korijenTabZn.getidentifikatori())
     	{
     		if(IDN.getime().equals("main"))
@@ -140,7 +132,6 @@ public class GeneratorKoda
 		return true;
 	}
     
-    //efka dodano
     private static boolean nadi_funkciju(Cvor pom)
     {
     	LinkedList<String> ime=pom.getIme();
@@ -169,7 +160,6 @@ public class GeneratorKoda
 
 	private static void provjeriPrimarniIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
-		System.err.println("<primarni_izraz>");
 		if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("IDN"))
 		{
 			
@@ -200,7 +190,6 @@ public class GeneratorKoda
 				}
 			}
 			
-			//CvorTabZn.identifikator IDN=nadiJedUTren(trenutni.getdjeca().get(0),trenutniZn);
 
 			if (IDN==null)
 			{
@@ -216,7 +205,6 @@ public class GeneratorKoda
 			if(!IDN.gettip().get(0).equals("fun")) 
 			{
 				writer.write("\tLOAD R0, ");
-				//znaci da je globalna varijabla, inace je lokalna
 				if(globalVars.containsKey(IDN.getime().toUpperCase())) 
 				{
 					writer.write("(G_" + IDN.getime().toUpperCase() + ")\n");
@@ -254,10 +242,7 @@ public class GeneratorKoda
 			tip.add("int");
 			trenutni.setTip(tip);
 			trenutni.setl_izraz(false);
-			//SAC krivo vjv
-			//int h = Integer.parseInt(trenutni.getntip().get(0));
-			//PROVJERI EFKA OVO PROVJERITI HMM
-			//izbrisano *Integer.parseInt(trenutni.getntip().get(0) u int l=
+
 			int predzn=1;
 			if(trenutni.getntip().isEmpty())
 			{
@@ -272,7 +257,6 @@ public class GeneratorKoda
 			trenutni.setVrijednost(String.valueOf(l));
 			if(!trenutniZn.uBloku.isEmpty()) 
 			{
-				//2^19
 				BigInteger granica = new BigInteger(String.valueOf(524288));
 				if(big.compareTo(granica) == 1 || big.compareTo(granica.negate()) == -1) 
 				{
@@ -282,7 +266,6 @@ public class GeneratorKoda
 				} 
 				else 
 				{
-					//if(negative) 
 					{
 						if(Integer.parseInt(trenutni.getVrijednost()) < 0) 
 						{
@@ -350,14 +333,12 @@ public class GeneratorKoda
 		System.err.println("<postfiks_izraz>");
 		if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("<primarni_izraz>"))
 		{
-			//SAC
 			trenutni.getdjeca().get(0).setntip(trenutni.getntip());
 			provjeriPrimarniIzraz(trenutni.getdjeca().get(0), trenutniZn);
 			LinkedList<String> pr=trenutni.getdjeca().get(0).gettip();
 			trenutni.setTip(pr);
 			boolean priv=trenutni.getdjeca().get(0).getl_izraz();
 			trenutni.setl_izraz(priv);
-			//SAC
 			trenutni.setVrijednost(trenutni.getdjeca().get(0).getVrijednost());
 			trenutni.setIme(trenutni.getdjeca().get(0).getIme());
 		}
@@ -414,14 +395,12 @@ public class GeneratorKoda
 				trenutni.setTip(pom);
 				trenutni.setl_izraz(false);
 				
-				//SAC
 				trenutni.setIme(trenutni.getdjeca().get(0).getIme());
 				if(trenutni.getdjeca().get(0).getIme().size()!=1)
 				{
 					System.err.println("GRESKA NA LINIJI 378 OTPRILIKE");
 				}
 				writer.write("\tCALL F_" + trenutni.getdjeca().get(0).getIme().get(0).toUpperCase() + "\n");
-				//writer.write("\tCALL F_F\n");
 			}
 			else if(trenutni.getdjeca().get(2).getjedinkaIDN().equals("<lista_argumenata>"))
 			{
@@ -451,10 +430,8 @@ public class GeneratorKoda
 				p.add(trenutni.getdjeca().get(0).gettip().get(1));
 				trenutni.setTip(p);
 				trenutni.setl_izraz(false);
-				//SAC
 				trenutni.setIme(trenutni.getdjeca().get(0).getIme());
 				
-				//stavi predane parametre za funkciju na stog;
 				int hhh=0;
 				if(trenutni.getdjeca().get(2).getIme()==null)
 				{
@@ -466,15 +443,12 @@ public class GeneratorKoda
 				}
 				for(int i = 0; i < hhh; i++) 
 				{
-					//param je konstanta
 					if(trenutni.getdjeca().get(2).getIme().get(i).equals("")) {
 						writer.write("\tMOVE %D " + trenutni.getdjeca().get(2).getVrijednost() + ", R0"+ "\n");
 					}
 					
-					//param je var
 					else 
 					{
-						//ako je globalna
 						if(globalVars.keySet().contains(trenutni.getdjeca().get(2).getIme().get(i))) {
 							writer.write("\tLOAD R0, (G_" + trenutni.getdjeca().get(2).getIme() + "\n");
 						} 
@@ -488,7 +462,6 @@ public class GeneratorKoda
 					PUSH_CNT+=1;
 				}
 				writer.write("\tCALL F_" + trenutni.getdjeca().get(0).getIme().get(0).toUpperCase() + "\n");
-				//PROVJERITI EFKA
 				int vr=trenutni.getdjeca().get(2).gettip().size()*4;
 				writer.write("\tADD R7, " + Integer.toHexString(vr).substring(0) + ", R7"+"\n");
 				writer.write("\tPUSH R6\n");
@@ -607,10 +580,8 @@ public class GeneratorKoda
 		else if(trenutni.getdjeca().get(0).getjedinkaIDN().equals("<unarni_operator>"))
 		{
 			System.err.println("<unarni_operator>");
-			//unarni operator
 			Cvor unarni_operator=trenutni.getdjeca().get(0);
 			LinkedList<String> pom = new LinkedList<String>();
-			//SAC i tu je krivo valjda
 			if(trenutni.getdjeca().get(0).getdjeca().get(0).getjedinkaIDN().equals("MINUS")) 
 			{
 				System.out.println("aaL " + trenutni.getdjeca().get(1).getVrijednost());
@@ -627,7 +598,6 @@ public class GeneratorKoda
 			provjeriCastIzraz(trenutni.getdjeca().get(1), trenutniZn);
 			LinkedList<String> pr=new LinkedList<>();
 
-			//SAC nekaj krivo
 			System.out.println(trenutni.getdjeca().get(1).getVrijednost());
 			if(trenutni.getdjeca().get(0).getdjeca().get(0).getjedinkaIDN().equals("MINUS")) 
 			{
@@ -731,7 +701,6 @@ public class GeneratorKoda
 	private static void provjeriMultiplikativniIzraz(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
 	{
 		System.err.println("<multiplikativni_izraz>");
-		//mozda ne valja funkcionalnost
 		LinkedList<String> po = new LinkedList<>();
 		po.add("OP_PUTA");
 		po.add("OP_DIJELI");
@@ -763,30 +732,7 @@ public class GeneratorKoda
 				greska(trenutni);
 			}
 			
-			if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("PLUS"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tADD R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
 			
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("MINUS"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tSUB R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-                
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_I"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tAND R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_XILI"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tXOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_ILI"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
 			POP_CNT+=1;
 			trenutni.setTip(pr);
 			trenutni.setl_izraz(false);
@@ -835,20 +781,6 @@ public class GeneratorKoda
 				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tSUB R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
 			}
                 
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_I"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tAND R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_XILI"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tXOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_ILI"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
 			POP_CNT+=1;
 			trenutni.setTip(pr);
 			trenutni.setl_izraz(false);
@@ -891,30 +823,6 @@ public class GeneratorKoda
 				greska(trenutni);
 			}
 			
-			if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("PLUS"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tADD R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-			
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("MINUS"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tSUB R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-                
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_I"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tAND R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_XILI"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tXOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_ILI"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
 			POP_CNT+=1;
 			trenutni.setTip(pr);
 			trenutni.setl_izraz(false);
@@ -954,30 +862,6 @@ public class GeneratorKoda
 				greska(trenutni);
 			}
 			
-			if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("PLUS"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tADD R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-			
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("MINUS"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tSUB R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-                
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_I"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tAND R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_XILI"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tXOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_ILI"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
 			POP_CNT+=1;
 			trenutni.setTip(pr);
 			trenutni.setl_izraz(false);
@@ -1016,30 +900,12 @@ public class GeneratorKoda
 				greska(trenutni);
 			}
 			
-			if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("PLUS"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tADD R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-			
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("MINUS"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tSUB R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-                
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_I"))
+			if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_I"))
 			{
 				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tAND R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
 			}
 
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_XILI"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tXOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_ILI"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
+			
 			POP_CNT+=1;
 			trenutni.setTip(pr);
 			trenutni.setl_izraz(false);
@@ -1078,30 +944,11 @@ public class GeneratorKoda
 				greska(trenutni);
 			}
 			
-			if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("PLUS"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tADD R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-			
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("MINUS"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tSUB R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-                
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_I"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tAND R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_XILI"))
+			if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_XILI"))
 			{
 				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tXOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
 			}
-
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_ILI"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
+			
 			POP_CNT+=1;
 			trenutni.setTip(pr);
 			trenutni.setl_izraz(false);
@@ -1140,27 +987,7 @@ public class GeneratorKoda
 				greska(trenutni);
 			}
 			
-			if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("PLUS"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tADD R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-			
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("MINUS"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tSUB R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-                
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_I"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tAND R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_XILI"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tXOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_ILI"))
+			if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_ILI"))
 			{
 				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
 			}
@@ -1202,30 +1029,6 @@ public class GeneratorKoda
 				greska(trenutni);
 			}
 			
-			if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("PLUS"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tADD R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-			
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("MINUS"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tSUB R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-                
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_I"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tAND R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_XILI"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tXOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_ILI"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
 			POP_CNT+=1;
 			trenutni.setTip(pr);
 			trenutni.setl_izraz(false);
@@ -1264,30 +1067,6 @@ public class GeneratorKoda
 				greska(trenutni);
 			}
 			
-			if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("PLUS"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tADD R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-			
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("MINUS"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tSUB R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-                
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_I"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tAND R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_XILI"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tXOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
-
-			else if(trenutni.getdjeca().get(1).getjedinkaIDN().equals("OP_BIN_ILI"))
-			{
-				writer.write("\tPOP R1"+"\n"+"\tPOP R0"+"\n"+"\tOR R0, R1, R0"+"\n"+"\tPUSH R0\n\n");
-			}
 			POP_CNT+=1;
 			trenutni.setTip(pr);
 			trenutni.setl_izraz(false);
@@ -1570,13 +1349,7 @@ public class GeneratorKoda
 			}
 			LinkedList<String> pom=new LinkedList<>();
 			pom.add(trenutniZn.getUBloku().get(1));
-			/*boolean t=implProvjera(trenutni.getdjeca().get(1).gettip(),pom);
-			if(!t)
-			{
-				greska(trenutni);
-			}
-			*/
-			//SAC
+
 			if(!nadi_funkciju(trenutni.getdjeca().get(1)))
 			{
 				writer.write("\tPOP R6\n");
@@ -1600,8 +1373,6 @@ public class GeneratorKoda
 			provjeriVanjskaDeklaracija(trenutni.getdjeca().get(1),trenutniZn);
 			trenutni.setBroj_varijabli(trenutni.getdjeca().get(0).getBroj_varijabli()+trenutni.getdjeca().get(1).getBroj_varijabli());
 			
-			//SAC, EFKA FIX
-			//trenutni.brojVar = trenutni.getdjeca().get(0).brojVar + trenutni.getdjeca().get(1).brojVar;
 		}
 	}
 
@@ -1616,8 +1387,6 @@ public class GeneratorKoda
 		{
 			provjeriDeklaracija(trenutni.getdjeca().get(0),trenutniZn);
 			trenutni.setBroj_varijabli(trenutni.getdjeca().get(0).getBroj_varijabli());
-			//SAC
-			//trenutni.brojVar = trenutni.getdjeca().get(0).brojVar;
 		}
 	}
 
@@ -1657,10 +1426,7 @@ public class GeneratorKoda
 				pom.add("fun");
 				pom.add(trenutni.getdjeca().get(0).gettip().get(0));
 				pom.add("void");
-				/*if(trenutni.getdjeca().get(1).getjedinkaime().equals("main")) {
-					//writer.write("F_MAIN");
-					main = true;
-				}*/
+
 				IDN=new CvorTabZn.identifikator(pom, trenutni.getdjeca().get(1).getjedinkaime(), 1, false);
 				trenutniZn.dodajIdentifikator(IDN);
 			}
@@ -1682,7 +1448,6 @@ public class GeneratorKoda
 				writer.write("\tADD R7, 4, R7\n");
 			}
 			writer.write("\tRET\n");
-			//main = false;
 		}
 		else if(trenutni.getdjeca().get(3).getjedinkaIDN().equals("<lista_parametara>"))
 		{
@@ -1709,9 +1474,6 @@ public class GeneratorKoda
 				odmak.put(s, trenutni_odmak);
 				trenutni_odmak+=4;
 			}
-			//SAC, FIX EFKA
-			//trenutni_odmak = 8;
-			//jos toga
 			
 			CvorTabZn novi_cvor_znak= new CvorTabZn();
 			if(IDN!=null)
@@ -1796,26 +1558,6 @@ public class GeneratorKoda
 		}
 		else
 		{
-			/*
-			String pp=trenutni.getdjeca().get(0).getjedinkaIDN();
-			if(pp.equals("<lista_parametara>"))
-			{
-				provjeriListaParametara(trenutni.getdjeca().get(0),trenutniZn);
-			}
-			else if(pp.equals("<deklaracija_parametra>"))
-			{
-				provjeriDeklaracijaParametra(trenutni.getdjeca().get(0),trenutniZn);
-			}
-			else if(pp.equals("<ime_tipa>"))
-			{
-				provjeriImeTipa(trenutni.getdjeca().get(0),trenutniZn);
-			}
-			else if(pp.equals("<specifikator_tipa>"))
-			{
-				provjeriSpecifikatorTipa(trenutni.getdjeca().get(0),trenutniZn);
-			}
-			*/
-			//maknuto jer je bila greska i dodan gornji dio EFKA
 			provjeriListaParametara(trenutni.getdjeca().get(0),trenutniZn);
 			provjeriDeklaracijaParametra(trenutni.getdjeca().get(2),trenutniZn);
 			if(trenutni.getdjeca().get(0).getIme().equals(trenutni.getdjeca().get(2).getIme()))
@@ -1871,19 +1613,14 @@ public class GeneratorKoda
 		{
 			provjeriDeklaracija(trenutni.getdjeca().get(0),trenutniZn);
 			trenutni.setBroj_varijabli(trenutni.getdjeca().get(0).getBroj_varijabli());
-			//SAC
-			//trenutni.brojVar = trenutni.getdjeca().get(0).brojVar;
 		}
 		else
 		{
 			provjeriListaDeklaracija(trenutni.getdjeca().get(0),trenutniZn);
 			provjeriDeklaracija(trenutni.getdjeca().get(1),trenutniZn);
 			
-			//MOZDA KRIVO EFKA KRIVO KRIVO GET(1) + GET(0) MOZDA NEZ JEBIGA
 			trenutni.setBroj_varijabli(trenutni.getdjeca().get(0).getBroj_varijabli() + trenutni.getdjeca().get(0).getBroj_varijabli());
 			
-			//SAC
-			//trenutni.brojVar = trenutni.getdjeca().get(0).brojVar * 2;
 		}
 	}
 
@@ -1895,8 +1632,6 @@ public class GeneratorKoda
 		provjeriListaInitDeklaratora(trenutni.getdjeca().get(1),trenutniZn);
 		trenutni.setBroj_varijabli(trenutni.getdjeca().get(1).getBroj_varijabli());
 		
-		//SAC
-		//trenutni.brojVar = trenutni.getdjeca().get(1).brojVar;
 	}
 
 	private static void provjeriListaInitDeklaratora(Cvor trenutni, CvorTabZn trenutniZn) throws IOException
@@ -1907,8 +1642,7 @@ public class GeneratorKoda
 			trenutni.getdjeca().get(0).setntip(trenutni.getntip());
 			provjeriInitDeklarator(trenutni.getdjeca().get(0),trenutniZn);
 			trenutni.setBroj_varijabli(1);
-			//SAC
-			//trenutni.brojVar = 1;
+
 		}
 		else 
 		{
@@ -1917,8 +1651,6 @@ public class GeneratorKoda
 			trenutni.getdjeca().get(2).setntip(trenutni.getntip());
 			provjeriInitDeklarator(trenutni.getdjeca().get(2),trenutniZn);
 			trenutni.setBroj_varijabli(trenutni.getdjeca().get(0).getBroj_varijabli()+1);
-			//SAC
-			//trenutni.brojVar = trenutni.getdjeca().get(0).brojVar + 1;
 		}
 	}
 
@@ -1944,13 +1676,6 @@ public class GeneratorKoda
 				globalVars.put(trenutni.getdjeca().get(0).getdjeca().get(0).getjedinkaime(), "0");
 			}
 			
-			//SAC
-			//trenutni.brojVar = trenutni.getdjeca().get(0).brojVar;
-			
-			//ako se var nalazi u globalnom djelokrugu
-			/*if(trenutniZn.getUBloku().isEmpty()) {
-				globalVars.put(trenutni.getdjeca().get(0).getdjeca().get(0).getjedinkaime(), "0");
-			}*/
 		}
 		else 
 		{
@@ -1958,10 +1683,8 @@ public class GeneratorKoda
 			provjeriIzravniDeklarator(trenutni.getdjeca().get(0),trenutniZn);
 			provjeriInicijalizator(trenutni.getdjeca().get(2),trenutniZn);
 			
-			//EFKA NEZ KAJ S OVIM KRIVO MOZDA NEZ
 			CvorTabZn.identifikator IDN=nadiJedUTren(trenutni.getdjeca().get(0).getdjeca().get(0),trenutniZn);
 			IDN.setVrijednost(trenutni.getdjeca().get(2).getVrijednost());
-		    //IDN.vrijednost = trenutni_cvor.djeca[2].vrijednost
 			
 			
 			if(trenutni.getdjeca().get(0).gettip().get(0).equals("int") || trenutni.getdjeca().get(0).gettip().get(0).equals("const_int") || trenutni.getdjeca().get(0).gettip().get(0).equals("char") || trenutni.getdjeca().get(0).gettip().get(0).equals("const_char"))
@@ -2006,12 +1729,7 @@ public class GeneratorKoda
 			
 			trenutni.setBroj_varijabli(trenutni.getdjeca().get(0).getBroj_varijabli());
 			
-			//SAC
-			//trenutni.brojVar = trenutni.getdjeca().get(0).brojVar;
-			
-			//SAC ovo je sjebavalo 2. primjer
-			//EFKA VRATIO U POGON
-			//ako se var nalazi u globalnom djelokrugu:
+
 			if(trenutniZn.getUBloku().isEmpty()) 
 			{
 				globalVars.put(trenutni.getdjeca().get(0).getdjeca().get(0).getjedinkaime().toUpperCase(), trenutni.getdjeca().get(2).getVrijednost());
