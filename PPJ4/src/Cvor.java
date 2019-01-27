@@ -1,16 +1,27 @@
+package hehe;
 import java.util.LinkedList;
 
 public class Cvor
 {
-
     LinkedList<String> ime;
     int brElem;
+    int broj_varijabli=0;
     boolean l_izraz;
     leksJed jedinka;
     private String vrijednost;
     LinkedList<Cvor> djeca = new LinkedList<>();
     LinkedList<String> tip = new LinkedList<>();
     LinkedList<String> ntip = new LinkedList<>();
+    
+    public void setBroj_varijabli(int broj_varijabli)
+    {
+    	this.broj_varijabli=broj_varijabli;
+    }
+    
+    public int getBroj_varijabli()
+    {
+    	return this.broj_varijabli;
+    }
     
     public void setVrijednost(String vrijednost) {
     	this.vrijednost = vrijednost;
